@@ -1,19 +1,19 @@
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
-*.log
+.log
 *.lot
 *.fls
-*.out
+.out
 *.toc
 
 ## Intermediate documents:
 *.dvi
 *-converted-to.*
 # these rules might exclude image files for figures etc.
-# *.ps
-# *.eps
-# *.pdf
+.ps
+.eps
+.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl

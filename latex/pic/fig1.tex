@@ -1,0 +1,77 @@
+% \documentclass{standalone} 
+% standalone mode causes trouble when using tikz
+
+\documentclass[varwidth]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows}
+\usepackage{amsmath,bm,times}
+
+\begin{document}
+
+% Define the layers to draw the diagram
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+% Define block styles used later
+
+\tikzstyle{event}=[draw, fill=gray!20, text width=4em, 
+    text centered, minimum height=2.5em,drop shadow]
+\tikzstyle{sensor}=[draw, fill=blue!20, text width=4em, 
+    text centered, minimum height=2.5em,drop shadow]
+\tikzstyle{ann} = [above, text width=5em, text centered]
+\tikzstyle{wa} = [sensor, text width=6em, fill=red!20, 
+    minimum height=4em, rounded corners, drop shadow]
+\tikzstyle{sc} = [sensor, text width=13em, fill=red!20, 
+    minimum height=10em, rounded corners, drop shadow]
+
+% Define distances for bordering
+\def \blockdist{1.5}
+\def \edgedist{1.5}
+
+\begin{tikzpicture}
+
+    \node (wa)[wa]{IoT Crawlers};
+    \path (wa.west)+(-4.0,1.5) node (event1)[event]{$Events$};
+    \path (wa.west)+(-4.0,0.5) node (event2)[event] {$Events$};
+    \path (wa.west)+(-4.0,-1.0) node (event3)[ann] {$\vdots$}; 
+    \path (wa.west)+(-4.0,-2.0) node (event4)[event] {$Events$};
+    
+    \path (event1.east)+(\blockdist,0) node (sensor1)[sensor]{$Sensor_1$};
+    \path (event2.east)+(\blockdist,0) node (sensor2)[sensor] {$Sensor_2$};
+    \path (event3.east)+(\blockdist-0.1,-0.4) node (sensor3)[ann] {$\vdots$}; 
+    \path (event4.east)+(\blockdist,0) node (sensor4)[sensor] {$Sensor_N$};
+    
+    \path (wa.east)+(\blockdist,0) node (repo) [wa] {Repository};
+    
+    \path (event1.east) -- node [above]{}(sensor1.west);
+    \draw [dashed, ->] (event1.east) -- (sensor1.west);
+    \path (event2.east) -- node [above]{}(sensor2.west);
+    \draw [dashed, ->] (event2.east) -- (sensor2.west);
+    \path (event4.east) -- node [above]{}(sensor4.west);
+    \draw [dashed, ->] (event4.east) -- (sensor4.west);
+    
+    \path [draw, <-] (sensor1.east) -- node [above]{}(wa.160) ;
+    \path [draw, <-] (sensor2.east) -- node [above]{}(wa.180);
+    \path [draw, <-] (sensor4.east) -- node [above]{}(wa.200);
+    \path [draw, ->] (wa.east) -- node [above]{}(repo.west);
+    \path (wa.south east) +(0, -0.6) node (asrs) {IoT Crawling Engine};
+    
+    \begin{pgfonlayer}{background}
+        \path (wa.west |- wa.north)+(-0.5,0.4) node (a) {};
+        \path (wa.south -| repo.east)+(+0.5,-0.3) node (b) {};
+        \path (repo.east |- repo.east)+(+0.5,-1.6) node (c) {};
+          
+        \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
+            (a) rectangle (c);           
+        \path (repo.north west)+(-0.2,0.2) node (a) {};
+            
+    \end{pgfonlayer}
+    % \draw [brown] (current bounding box.south west) rectangle (current bounding box.north east);
+
+\end{tikzpicture}
+
+
+
+
+\end{document}

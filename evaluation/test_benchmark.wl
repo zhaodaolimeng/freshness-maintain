@@ -1,17 +1,20 @@
 (* ::Package:: *)
 
-BeginPackage["BasicBenchmark`",{"OptimalSchedule`"}]
-
+BeginPackage["Benchmark`",{"OptimalScheduleAdhocDp`"}]
+(*
+Only expectation function is implied as a final measurement,
+to check the actually event version, see test_benchmark_discrete
+*)
 TestSensorScale::usage="TestSensorScale[sensorSettings_,minRange_,timeRange_]"
 TestTotalCrawlNumber::usage="TestTotalCrawlNumber[sensorSettings_,minCrawl_,maxCrawl_]"
 TestDiscretization::usage="TestDiscretization[sensorSettings_, minEps_, maxEps_]"
 
 Begin["`Private`"]
 
-TestSensorScale[sensorSettings_,minScale_,maxScale_]:=Module[
-	{retArr,ret,sensors,lList,crawlLimList,TimeTable,
+TestSensorScale[sensorSettings_,scaleList_]:=Module[
+	{ret,sensors,lList,crawlLimList,TimeTable,
 	\[Theta],\[Delta],\[Epsilon],maxiter,maxwp,minwp,maxwr,minwr,tr,maxc,minc,maxcs,mincs,maxl,minl},
-	Print["Start sensor scale test..."];
+	Print["Start sensor scale test..."];	
 	crawlLimList={};
 	\[Delta]=sensorSettings["\[Delta]"];
 	\[Epsilon]=sensorSettings["\[Epsilon]"];
@@ -27,6 +30,23 @@ TestSensorScale[sensorSettings_,minScale_,maxScale_]:=Module[
 	mincs=sensorSettings["mincrawlsingle"];
 	maxl=sensorSettings["maxLambda"];
 	minl=sensorSettings["minLambda"];
+	
+	Do[
+		Print["Scale = "<> ToString[sensors]];
+
+		minc=minc*sensors;
+		maxc=maxc*sensors;
+
+		lList=RandomReal[maxl-minl,{sensors}]+minl;
+		crawlLimList=RandomInteger[maxcs-mincs,{sensors}]+mincs;
+		\[Theta]=RandomInteger[{minc,minc}];(*sum of crawl numbers*)		
+		TimeTable=TimeTableMaker[sensors,maxwp,minwp,maxwr,minwr,tr];
+		ret["opt"]=\[Infinity];ret["arrange"]={};		
+		ret=OptimalScheduleAdhocDp`DebugSchedule[
+			lList,TimeTable,crawlLimList,\[Theta],\[Delta],\[Epsilon],maxiter,ret];
+		retArr[sensors]=ret["opt"];
+		sensors++,{sensors,scaleList}];
+(*
 	For[sensors=minScale,sensors<=maxScale,
 		Print["Scale = "<> ToString[sensors]];
 		lList=RandomReal[maxl-minl,{sensors}]+minl;		
@@ -37,7 +57,7 @@ TestSensorScale[sensorSettings_,minScale_,maxScale_]:=Module[
 		ret=OptimalScheduleAdhocDp`DebugSchedule[
 			lList,TimeTable,crawlLimList,\[Theta],\[Delta],\[Epsilon],maxiter,ret];
 		retArr[sensors]=ret["opt"];
-		sensors++];
+		sensors+=stepLen];*)
 	retArr]
 
 TestTotalCrawlNumber[sensorSettings_,minCrawl_,maxCrawl_]:=Module[{
@@ -115,9 +135,8 @@ TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_
 End[]
 EndPackage[]
 
-
-
-SetDirectory["/Users/Li/Desktop/Paper Workspace/repository-freshness-maintain/evaluation"];
+(*SetDirectory["/Users/Li/Desktop/Paper Workspace/repository-freshness-maintain/evaluation"];*)
+SetDirectory["G:\\desktop\\freshness-maintain\\evaluation"];
 <<"optimal_schedule_adhocdp.wl";
 
 (*Sensor Scale Test*)
@@ -129,22 +148,48 @@ sensorSettings["minwRange"]=1;
 sensorSettings["\[Delta]"]=0.1;
 sensorSettings["\[Epsilon]"]=2;
 sensorSettings["timeRange"]=200;
-sensorSettings["maxcrawl"]=20;
-sensorSettings["mincrawl"]=15;
+sensorSettings["maxcrawl"]=2.0;(*rate of sum of sensors*)
+sensorSettings["mincrawl"]=1.5;
 sensorSettings["maxcrawlsingle"]=6;
 sensorSettings["mincrawlsingle"]=1;
 sensorSettings["maxLambda"]=1.0;
 sensorSettings["minLambda"]=0.1;
-minScale=2;
-maxScale=20;
-retArr=BasicBenchmark`TestSensorScale[sensorSettings,minScale,maxScale];
-DiscretePlot[retArr[x],{x,minScale,maxScale}]
+
+
+(*retMatrix={};*)
+(*
+minScale=1;
+maxScale=100;
+averList=Array[0&,maxScale-minScale+1];
+maxList=Array[0&,maxScale-minScale+1];
+minList=Array[\[Infinity]&,maxScale-minScale+1];*)
+scaleList = Range[10,100,10];
+averList=Array[0&,Length[scaleList]];
+maxList=Array[0&,Length[scaleList]];
+minList=Array[\[Infinity]&,Length[scaleList]];
+
+For[counts=0,counts<5,counts++;
+	retArr=Benchmark`TestSensorScale[sensorSettings,scaleList];
+	For[i=1,i<Length[scaleList],i++;
+		averList[[i]]+=retArr[scaleList[[i]]];
+		maxList[[i]]=Max[maxList[[i]],retArr[scaleList[[i]]]];
+		minList[[i]]=Min[minList[[i]],retArr[scaleList[[i]]]];];
+	Print[averList];
+	Print[maxList];
+	Print[minList]
+]
+averList/=5;
+(*DiscretePlot[retArr[x],{x,minScale,maxScale}]*)
+retTable=Transpose[{averList,maxList-minList}];
+Needs["ErrorBarPlots`"];
+ErrorBarPlots`ErrorListPlot[retTable]
+
 
 (*Crawl Numbers Test*)
 sensorSettings["sensorScale"]=8;
 minCrawl=10;
 maxCrawl=50;
-retArr=BasicBenchmark`TestTotalCrawlNumber[sensorSettings,minCrawl,maxCrawl];
+retArr=Benchmark`TestTotalCrawlNumber[sensorSettings,minCrawl,maxCrawl];
 DiscretePlot[retArr[x],{x,minCrawl,maxCrawl}]
 
 
@@ -162,5 +207,8 @@ sensorSettings["maxwRange"]=50;
 sensorSettings["minwRange"]=5;
 minEps=1;
 maxEps=50;
-retArr=BasicBenchmark`TestDiscretization[sensorSettings,minEps,maxEps];
+retArr=Benchmark`TestDiscretization[sensorSettings,minEps,maxEps];
 DiscretePlot[retArr[x],{x,minEps,maxEps}]
+
+
+

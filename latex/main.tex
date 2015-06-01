@@ -59,7 +59,7 @@
 % can use linebreaks \\ within to get better formatting as desired
 % \title{Repository Freshness Maintain in a CoAP-based\\ IoT Search System}
 % \title{Repository Freshness Maintain in a Web-based\\ IoT Search System}
-\title{A Schedule Method for Effective Crawling of IoT Devices}
+\title{A Schedule Method for\\Crawling Low-power IoT Devices}
 
 % author names and affiliations
 % use a multiple column layout for up to three different
@@ -77,13 +77,11 @@
 
 \begin{abstract}
 %\boldmath
-The search of Internet of things is an important way for people and applications to exploit useful sensors and device.
-In this paper, we study the crawling problem in IoT search engine, which is a fundamental component towards building a generic IoT search engine.
-With resource description method such as CoRE, it possible to build IoT search engines with Web technology, but the crawl of IoT sensors and device is very different from that of Web, especially when crawling target are energy-constraint and hibernate-enabled IoT sensors. 
-These sensors are very common in IoT systems, and the efficiency of traditional crawling schedule strategy can be impact by their behaviors.
-In this paper, we formulate the IoT search problem as an optimization problem. 
+The search of IoT(Internet of things) is an important way for people and applications to exploit useful sensors and device. In this paper, we study the crawling problem in IoT search engine, which is a fundamental component towards building a generic IoT search engine.
+With resource description method such as CoRE, it possible to build IoT search engines with Web technology, but the crawl of IoT sensors and device is very different from that of Web, especially when crawling target are energy-constraint and hibernate-enabled IoT sensors. With these low-power devices widely used in different iot systems, traditional crawling schedule strategy may not be suitable.
+In this paper, we came up with an IoT devices crawling problem with energy constraints, and formulated it as an optimization problem. 
 We use the Poisson process to model events that user care, and proposed a measurement using the expectation of latency. 
-Using this measurement as a main optimization index, an approach is designed to get the near optimal schedule strategy for different hibernate situations. 
+Using this measurement as optimization object function, an approach is designed to get the near optimal schedule strategy for different low-power situations.
 At last, we use simulations to test the expectation of latency of our new scheduling method, which illustrates the effectiveness for repository freshness and lower energy impact on the IoT sensors.
 \end{abstract}
 
@@ -302,10 +300,11 @@ With an acceptable scale of time range $T$ and crawl time $n$, this problem can 
 \]
 
 
-$f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v_i$, with cost exactly $n$ steps. The computation complexity of iterating process is $O(Tn^2)$, in which $nT$ sub-problem are computed and each computation will cost $n$ operations. The backtrack method uses $p(v_i, n)$ to get the optimal strategy, which takes at most $n$ steps. As a result, the overall complexity is still $O(Tn^2)$ 
+$f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v_i$, with cost exactly $n$ steps. In each step, we go over the  The computation complexity of iterating process is $O(T^2n)$, in which $nT$ sub-problem are computed and each computation will cost $n$ operations. The backtrack method uses $p(v_i, n)$ to get the optimal strategy, which takes at most $n$ steps. As a result, the overall complexity is still $O(T^2n)$ 
 
 \begin{algorithm}
 \caption{Latency Minimum Non-periodic Crawl Method}
+  \label{alg:dp_min}
   \begin{algorithmic}[1]
   \renewcommand{\algorithmicrequire}{\textbf{Input:}}
   \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -326,27 +325,29 @@ $f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v
 
 \subsection{Global Solutions}
 % With the relationship between number of crawls and expectation latency, we can get the optimal strategy for all sensors
-In previous section, we can figure out the relationship between the number of crawls and the expectation of latency, written as $E_L(n)$. Although We did not find a close-form solution, the computation time of given approach for $E_L(n)$ is acceptable. 
+In previous section, we figure out the relationship between the number of crawls and the expectation of latency $E_L(n)$. Although we did not find a close-form solution, our approximation method can meet the demand with an acceptable computation cost. The global optimization problem to dispatch crawls to different resources can be solved by dozen of optimization methods.
 Now the object function of formulation \ref{OBJ} can be rewrite as $\sum_{i=1}^{N} \omega_i E_L(n_i)$. The bandwidth constraint can be taken as $\sum_{i=1}^{N} n_i < M$ and the energy constraint of single sensor can be rewrite as $n_i<\gamma_i$.
 
 
-The global optimization problem to dispatch crawls to different resources can be solved by dozen of nonlinear optimization methods.
-Here notice the optimal crawl strategy is fixed once crawl times $n$ is chosen, and every function of $E_L(n)$ is non-decreasing,  we design a naive approach which is very similar to SMO\cite{Platt1998}. 
+Once crawl times $n$ is chosen, then the optimal crawl strategy for a single sensor is determined, and every function of $E_L(n)$ is non-decreasing,  we design a naive approach which is very similar to SMO\cite{Platt1998}. 
 The big figure is to dispatch crawl time and continuously refine the dispatch strategy until no improvement can be made.
 First we dispatch the $M$ crawl time to $N$ sensors according to $\omega_i$. Then we start to search sensors for a pair $i$, $j$. If $i\gets i-1$ and $j\gets j+1$ will cause a largest improvement to the object function compared to the other pairs, then changes of $i$ and $j$ are conformed. Continue this process until none improvement can be made.
 
 
 \subsection{Parameter Selection}
-
-%%
-
-% To what extend does the T_w/\Delta T 
+Through algorithm 
 
 
 
-\section{Simulation and Prototype}
+\section{Simulation and Evaluation}
+
 
 \subsection{Measurement}
+
+\subsection{Parameters}
+
+\subsection{Compare with Random Scheduling}
+
 
 \section{Conclusion}
 

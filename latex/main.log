@@ -1,7 +1,7 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2015.4.27)  25 MAY 2015 08:54
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2015.4.27)  27 MAY 2015 16:08
 entering extended mode
 **main.tex
-("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\main.tex"
+(G:\desktop\freshness-maintain\latex\main.tex
 LaTeX2e <2011/06/27>
 Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
 abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
@@ -13,7 +13,7 @@ german-x-2013-05-26, nynorsk, oriya, panjabi, pinyin, polish, portuguese, roman
 ian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, swissgerm
 an, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, usengl
 ishmax, welsh, loaded.
-("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\IEEEtran.cls"
+(G:\desktop\freshness-maintain\latex\IEEEtran.cls
 Document Class: IEEEtran 2012/11/21 V1.8c by Harald Hanche-Olsen and Anders Chr
 istensen
 -- Based on V1.7a by Michael Shell
@@ -817,7 +817,7 @@ Package caption Info: float package is loaded.
 \c@notation=\count150
 \c@definition=\count151
 \c@remark=\count152
- ("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\main.aux")
+ (G:\desktop\freshness-maintain\latex\main.aux)
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 56.
 LaTeX Font Info:    ... okay on input line 56.
 LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 56.
@@ -873,21 +873,21 @@ LaTeX Warning: Citation `ifttt' on page 1 undefined on input line 94.
 
 
 ]
-("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\pic/fig1.tex"
+(G:\desktop\freshness-maintain\latex\pic/fig1.tex
 \pgf@layerbox@foreground=\box68
 \pgf@layerboxsaved@foreground=\box69
 )
 File: pic/fig1.tex Graphic file (type tex)
-[2]
+ [2]
 ** ATTENTION: \proof is deprecated (line 189). Use \IEEEproof instead.
 ** ATTENTION: \proof is deprecated (line 237). Use \IEEEproof instead.
-[3]
-("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\pic/fig3.tex")
+[3] (G:\desktop\freshness-maintain\latex\pic/fig3.tex)
 File: pic/fig3.tex Graphic file (type tex)
-[4] ("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\main.bbl")
-[5]
-("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\pic/fig2.tex")
+ [4]
+(G:\desktop\freshness-maintain\latex\main.bbl) [5]
+(G:\desktop\freshness-maintain\latex\pic/fig2.tex)
 File: pic/fig2.tex Graphic file (type tex)
+
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -899,16 +899,16 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[6] ("G:\desktop\Paper Workspace\repository-freshness-maintain\latex\main.aux")
+[6] (G:\desktop\freshness-maintain\latex\main.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 21441 strings out of 493921
- 472370 string characters out of 3147279
- 769525 words of memory out of 3000000
- 24297 multiletter control sequences out of 15000+200000
+ 21442 strings out of 493921
+ 471896 string characters out of 3147279
+ 769577 words of memory out of 3000000
+ 24298 multiletter control sequences out of 15000+200000
  49996 words of font info for 116 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
  67i,13n,113p,799b,1518s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -932,7 +932,7 @@ rogram Files/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Program Files/MiKT
 eX 2.9/fonts/type1/urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/typ
 e1/urw/times/utmr8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/times/utmr
 i8a.pfb>
-Output written on main.pdf (6 pages, 266640 bytes).
+Output written on main.pdf (6 pages, 266705 bytes).
 PDF statistics:
  133 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

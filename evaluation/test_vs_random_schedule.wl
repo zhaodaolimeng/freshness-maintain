@@ -7,9 +7,6 @@ TestScaleOfRandomVsOptimal[]::usage=
 	"with random scheduling and optimal scheduling"
 
 Begin["`Private`"]
-
-
-
 (*maxwperiod is the max count of work cycles*)
 TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_]:=Module[
 	{i,j,cycles,aList={},lList={},$tt={}},
@@ -24,6 +21,5 @@ TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_
 			]];
 		AppendTo[$tt,Transpose[{aList,lList}]]];
 	$tt]
-
 End[]
-EndPackage
+EndPackage[]

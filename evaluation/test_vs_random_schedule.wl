@@ -17,7 +17,7 @@ Begin["`Private`"]
 
 
 
-TestScaleOfRandomVsOptimal[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_]:=Module[
+generate[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_]:=Module[
 	{i,j,cycles,aList={},lList={},$tt={}},
 	For[i=0,i<sensors,i++;
 		cycles=RandomInteger[{minwperiod,maxwperiod}];
@@ -32,6 +32,3 @@ TestScaleOfRandomVsOptimal[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange
 	$tt]
 End[]
 EndPackage[]
-
-
-

@@ -142,12 +142,12 @@ Our paper is organized as follows. We formalize the optimization problem in sect
 \subsection{Contribution}
 This paper has two major contributions.
 \begin{itemize}
-\item This is the first paper to consider the crawling problem in IoT system, where we model the hibernation and energy constraint of sensors and model also model crawl scheduling as an optimization problem.
+\item Although crawler scheduling problem is well studied in the field of IR, to our best knowledge, this work is the first to consider the crawling problem in IoT system and formalized as an optimization problem.
 \item A practical heuristic approach for choosing crawling strategy under different circumstances is proposed for this model, which is evaluated in simulation.
+\item We studied crawled the real world data from 
 \end{itemize}
 
 \section{Formulation}
-
 Assume information updating events arrives at each sensor as a Poisson Process $\{N(t), t\geq0\}$ having rate $\lambda$. 
 These events can be written as random variable $U_1, U_2, \ldots$. The crawler access this sensor at time $t$. Each event happens before crawling time $t$ and after last crawling time, which called $t_s$, cause the  expectation of repository refresh latency to increase, which means the data gathered by sensor become old/out-of-fashion. Refresh latency is an important indicator for the synchronization level between repositories and sensors in IoT search engine.
 

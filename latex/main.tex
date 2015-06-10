@@ -131,15 +131,13 @@ We also investigated the relevant schedule methods used in Web search. Previous 
 	\caption{Framework of Pull-based IoT Search System}
 	\label{fig:framework}
 \end{figure}
-Due to the 
-We study IoT crawl scheduling problem using the pull-based architecture illustrated by Fig.\ref{fig:framework}. Our method EasiSC is a scheduling strategy implemented in the IoT Crawlers module. With the help of semantic IoT method and the light protocols, IoT sensor descriptions reveal the realtime state of sensors can be accessed. IoT search engine regularly access the IoT descriptions and updates the related repository, which can be considered as a copy of descriptions of states of different sensors. Actually, we can use CoAP with CoRE resource description method as the standardized protocol for sensors and devices, the description message are listed in the ./well-know file used in the CoRE framework.
+We study IoT crawl scheduling problem using the pull-based architecture illustrated by Fig.\ref{fig:framework}. 
+We assume the user only interest in the events monitored by corresponded sensors, which arrives randomly. With the help of semantic IoT method, IoT sensors capture the event stream, and continuously update its description file, which reveal the realtime state of sensors. IoT search engine regularly access the IoT descriptions, then updates the related repository. CoAP with CoRE resource description method can be used as standardized protocol for sensors and devices, and the description message are listed in the ./well-know file used in the CoRE framework. 
 
-Our problem now became :...
-We can solve in X steps ... 
-brief ... introduction ...
-% At what rate should the crawler crawl these useful messages in order to keep the freshness of repository? Although many previous work of Web search has been done, but IoT devices search with constraint power and duty cycle make IoT search quite a different work. In this paper, we will discuss the repository freshness problem, particularly, how to handle the sensor constraints and duty cycle strategy widely used in IoT systems.
-%%%% WTF???
 
+EasiSC is a scheduling strategy implemented as the role of IoT Crawl Scheduler. Our  design principle is to minimize the information latency during  a period while meet the energy constraint of IoT devices, given sensor sleeping schedule and the frequency of event.
+The insight of the solution lies in the convexity of the function between crawl times and latency for a single device. If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: (1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? (2) What's the best schedule strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiSC is implemented in a iterative way based on these analyze. For each steps, EasiSC compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.
+Our paper is organized as follows. We formalize the optimization problem in section II, then introduce EasiSC in section III. Simulations and a case study are preformed in section IV. 
 
 \subsection{Contribution}
 This paper has two major contributions.

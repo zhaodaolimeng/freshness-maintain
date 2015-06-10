@@ -7,8 +7,17 @@ TestScaleOfRandomVsOptimal[]::usage=
 	"with random scheduling and optimal scheduling"
 
 Begin["`Private`"]
-(*maxwperiod is the max count of work cycles*)
-TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_]:=Module[
+(*
+	Generate discrete events following Poission process in periodic timelne	
+	Input: 
+		number of sensors, lambda of each sensor
+	Output: 
+		time table
+*)
+
+
+
+TestScaleOfRandomVsOptimal[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_]:=Module[
 	{i,j,cycles,aList={},lList={},$tt={}},
 	For[i=0,i<sensors,i++;
 		cycles=RandomInteger[{minwperiod,maxwperiod}];
@@ -23,3 +32,6 @@ TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_
 	$tt]
 End[]
 EndPackage[]
+
+
+

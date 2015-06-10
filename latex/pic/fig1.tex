@@ -1,5 +1,6 @@
 % \documentclass{standalone} 
 % standalone mode causes trouble when using tikz
+% http://www.texample.net/tikz/examples/system-combination/
 
 \documentclass[varwidth]{standalone}
 \usepackage{tikz}
@@ -55,23 +56,17 @@
     \path [draw, <-] (sensor2.east) -- node [above]{}(wa.180);
     \path [draw, <-] (sensor4.east) -- node [above]{}(wa.200);
     \path [draw, ->] (wa.east) -- node [above]{}(repo.west);
-    \path (wa.south east) +(0, -0.6) node (asrs) {IoT Crawling Engine};
+    \path (wa.south east) +(0, -0.6) node (asrs) {IoT Crawl Schedular};
     
     \begin{pgfonlayer}{background}
         \path (wa.west |- wa.north)+(-0.5,0.4) node (a) {};
         \path (wa.south -| repo.east)+(+0.5,-0.3) node (b) {};
         \path (repo.east |- repo.east)+(+0.5,-1.6) node (c) {};
-          
         \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
             (a) rectangle (c);           
         \path (repo.north west)+(-0.2,0.2) node (a) {};
-            
     \end{pgfonlayer}
-    % \draw [brown] (current bounding box.south west) rectangle (current bounding box.north east);
 
 \end{tikzpicture}
-
-
-
 
 \end{document}

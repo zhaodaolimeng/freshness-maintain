@@ -14,9 +14,6 @@ Begin["`Private`"]
 	Output: 
 		time table
 *)
-
-
-
 generate[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_]:=Module[
 	{i,j,cycles,aList={},lList={},$tt={}},
 	For[i=0,i<sensors,i++;

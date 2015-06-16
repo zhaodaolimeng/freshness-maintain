@@ -135,8 +135,8 @@ TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_
 End[]
 EndPackage[]
 
-(*SetDirectory["/Users/Li/Desktop/Paper Workspace/repository-freshness-maintain/evaluation"];*)
-SetDirectory["G:\\desktop\\freshness-maintain\\evaluation"];
+SetDirectory["/Users/Li/Desktop/freshness/evaluation"];
+(*SetDirectory["G:\\desktop\\freshness-maintain\\evaluation"];*)
 <<"optimal_schedule_adhocdp.wl";
 
 (*Sensor Scale Test*)

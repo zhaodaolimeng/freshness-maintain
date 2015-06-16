@@ -1,46 +1,56 @@
 (* ::Package:: *)
 
-BeginPackage["EasiCrawlSchedule`"]
+BeginPackage["EasiSC`"]
 
-EasiCrawl::usage=
-	"EasiCrawl[lambdaList_,timeTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_,$R_] "<>
-	"return the optimal schedule distribution f[opt]=?, f[arrange]=?"
+EasiCrawl::usage="EasiCrawl return the optimal schedule distribution f[opt]=?, f[arrange]=?"
 
 Begin["`Private`"]
 (*
 Main entry
-lambdaList is the parameter of Poission Process,
-sleepPlan is a n*n*2
-crawlLimitsList is the maximum times that a device can be crawled.
+---
+lambdaList, parameter of Poission Process,
+sleepPlan, n*m*2, n is sensors, m[[1]] is duty cycles & m[[2]] is working time
+crawlLimitsList, maximum times that a device can be crawled for each sensor.
+totalCrawls, maximal crawl amount that is OK for server.
+stepLength, the grantity of discretization.
+improveThreshold, threshold of the iterative method
+iteratorLimit, maximal iteration times
+$R, parameter for function style return.
+---
+$R, {"opt": 1, "arrange": N*1}, N is sensor number
 *)
 EasiCrawl[
-	lambdaList_,sleepPlan_,crawlLimitsList_,
-	\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_,$R_]:=Module[
-	{oldOpt,sensors,t,i,dist={},expTable,ret},
-	Print["Discretize timeline."];
-	dist=DiscretizeTimeline[sleepPlan,lambdaList,\[Epsilon]];
-	Print["Begin to compute expectation."];
+	lambdaList_,sleepPlan_,crawlLimitsList_,totalCrawls_,
+	stepLength_,improveThreshold_,iteratorLimit_,$R_]:=Module[
+	{oldOpt,sensors,i,distanceMatrix,dp,ret},	
+	Print["Starting ..."];
+	distanceMatrix=DiscretizeTimeline[sleepPlan,lambdaList,stepLength];
+	Print["Distance matrix built ..."];
 	$R["opt"]=\[Infinity];
-	$R["arrange"]=EvenlyDivide[\[Theta],Dimensions[lambdaList][[1]],crawlLimitsList];	
-	expTable={};
+	$R["arrange"]=EvenlyDivide[totalCrawls,crawlLimitsList];
+	dp={};(*Memo of time table, n*m, the minimal expectation can achieved*)
 	sensors=Dimensions[lambdaList][[1]];
-	t=Dimensions[dist][[1]];
 	oldOpt=0;
-	For[i=0,i<sensors,i++;AppendTo[expTable,Array[-1&,{crawlLimitsList[[i]]}]];];
-	For[i=0,Abs[$R["opt"]-oldOpt]>=\[Delta]&&i<iteratorLimit,i++;
+	For[i=0,i<sensors,i++;
+		AppendTo[dp,Array[-1&,{crawlLimitsList[[i]]}]];];
+	For[i=0,Abs[$R["opt"]-oldOpt]>=improveThreshold&&i<iteratorLimit,i++;
 		oldOpt=$R["opt"];
-		ret=ImproveSolution[$R,expTable,dist,crawlLimitsList];
+		ret=ImproveSolution[$R,dp,distanceMatrix,crawlLimitsList];
 		$R=ret["$R"];
 		If[i==1, Print["Before improve, Opt is "<>ToString[$R["opt"]]]];
-		expTable=ret["expTable"]];
+		dp=ret["dp"]		
+	];	
 	Print["After improve, Opt is "<> ToString[$R["opt"]]];
 	Print["Arrange is " <> ToString[$R["arrange"]]];
 	$R]
 
 (*
 Frist arrangement, divide the crawls as even as possible
-totalCrawls is the total number allowed
-crawlLimitsList is the crawls can be taken to each sensor
+---
+totalCrawls, total number allowed
+crawlLimitsList, maximal crawls can be taken to each sensor
+---
+$arr, N*1, N is sensor number
 *)
 EvenlyDivide[totalCrawls_,crawlLimitsList_]:=Module[
 	{$arr,t,i,sensors},
@@ -54,16 +64,23 @@ EvenlyDivide[totalCrawls_,crawlLimitsList_]:=Module[
 	$arr]
 
 (*
-Discretization is used to find check points in the timeline
+Discretization is to find the key check points for a single sensor's timeline
+---
+sleepPlan, the same data structure as the upper introduction.
+lambdaList, controls the density of events
+stepLength, granularity of discretization
+---
+$dist, N*M_i*M_i, N is sensor number & M_i*M_i is the time matrix of sensor i
 *)
-DiscretizeTimeline[timeTable_,lambdaList_,stepLength_]:=Module[
+DiscretizeTimeline[sleepPlan_,lambdaList_,stepLength_]:=Module[
 	{$dist={},candicateCnt,i,j,k,nodesCnt,
 	sensors,sensor,cycles,timeline,timeNode,workCycle,distanceMap},
-	sensors=Dimensions[timeTable][[1]];
+	sensors=Dimensions[sleepPlan][[1]];
 	For[sensor=0,sensor<sensors,sensor++;
+		Print["Build distance map for sensor"<> ToString[sensor]];
 		timeNode={};
 		candicateCnt=0;
-		timeline=timeTable[[sensor]];
+		timeline=sleepPlan[[sensor]];
 		cycles=Dimensions[timeline][[1]];
 		For[i=0,i<cycles,i++;
 			workCycle=timeline[[i]];
@@ -79,32 +96,39 @@ DiscretizeTimeline[timeTable_,lambdaList_,stepLength_]:=Module[
 		AppendTo[$dist,distanceMap]];
 	$dist]
 
-(*Distance*)
-DistanceBetweenTimeNode[timeLine_,\[Lambda]_,start_,end_]:=Module[
-	{$dd,cycles,pos},
+(*
+Compute the distance between 2 different data points for a single sensor
+---
+timeLine, m*2, m is duty cycles
+lambda, density of events
+start, expectation begin time
+end, expectation end time
+---
+$dd, distance value 
+*)
+DistanceBetweenTimeNode[timeLine_,lambda_,start_,end_]:=Module[
+	{$dd,cycles,pos,EG},
+	EG[t_,\[Lambda]_]:=(E^(-t \[Lambda])-1+t \[Lambda])t;
 	cycles=Dimensions[timeLine][[1]];
 	pos=Position[timeLine,Select[timeLine,#[[1]]==start&]];
 	If[Length[pos]!=0,
-		$dd=EG[end-pos[[1]],\[Lambda]],
-		$dd=EG[end-start,\[Lambda]]];
+		$dd=EG[end-pos[[1]],lambda],
+		$dd=EG[end-start,lambda]];
 	$dd]
-EG[t_,\[Lambda]_]:=(E^(-t \[Lambda])-1+t \[Lambda])t;
 
-(*Precompute the cost of ALL possible arrangements for sensors*)
-PrecomputeCostMatrix[dist_,maxCrawl_]:=Module[
-	{ret={},forone,crawl,sensor,ut},
-	For[sensor=0,sensor<Dimensions[dist][[1]],sensor++;
-		forone={};
-		For[crawl=0,crawl<maxCrawl,crawl++;
-			ut=CrawlUtility[crawl,dist[[sensor]]];
-			AppendTo[forone,ut["opt"]];];
-		AppendTo[ret,forone]];
-	ret]
-
-(*Incremental Method*)
-ImproveSolution[solv_,exptable_,dist_,crawlLimitsList_]:=Module[
-	{$R,s1,s2,tmpArr,minExp,sensors,t,res,ret,fetchRet,expcopy,untouched},
-	expcopy=exptable;
+(*
+Incremental Method
+---
+solv, {"opt": value, "arrange": N*1}, N is sensor number
+dp, N*M_i, N is sensor number & M_i is maximal crawls for sensor i
+dist, N*M_i*M_i, N is sensor number & M_i is time nodes for sensor i
+crawlLimitsList, N*1, N is sensor number, improvements can be violate crawl number limit
+---
+ret, {"$R": solv, "dp": dp}, solv is feasiable solution & dp is the memo
+*)
+ImproveSolution[solv_,dp_,dist_,crawlLimitsList_]:=Module[
+	{s1,s2,tmpArr,minExp,sensors,t,res,ret,fetchRet,dpcopy,untouched},
+	dpcopy=dp;
 	minExp=\[Infinity];
 	res=Array[0&,{2}];
 	tmpArr=solv["arrange"];
@@ -113,48 +137,64 @@ ImproveSolution[solv_,exptable_,dist_,crawlLimitsList_]:=Module[
 	For[s1=0,s1<sensors,s1++;
 		For[s2=0,s2<sensors,s2++;
 			If[s1!=s2&&tmpArr[[s1]]+1<=crawlLimitsList[[s1]]&&tmpArr[[s2]]>=1,
-				fetchRet=FetchOrSolve[s1,tmpArr[[s1]]+1,dist[[s1]],expcopy];
-				expcopy=fetchRet["expTable"];t=fetchRet["$R"];
-				fetchRet=FetchOrSolve[s1,tmpArr[[s1]],dist[[s1]],expcopy];
-				expcopy=fetchRet["expTable"];t-=fetchRet["$R"];
-				fetchRet=FetchOrSolve[s2,tmpArr[[s2]]-1,dist[[s2]],expcopy];
-				expcopy=fetchRet["expTable"];t+=fetchRet["$R"];
-				fetchRet=FetchOrSolve[s2,tmpArr[[s2]],dist[[s2]],expcopy];
-				expcopy=fetchRet["expTable"];t-=fetchRet["$R"];
-				If[t<minExp,minExp=t;res[[1]]=s1;res[[2]]=s2;untouched=False]
+				fetchRet=FetchOrSolve[s1,tmpArr[[s1]]+1,dist[[s1]],dpcopy];
+				dpcopy=fetchRet["dp"];t=fetchRet["opt"];
+				fetchRet=FetchOrSolve[s1,tmpArr[[s1]],dist[[s1]],dpcopy];
+				dpcopy=fetchRet["dp"];t-=fetchRet["opt"];
+				fetchRet=FetchOrSolve[s2,tmpArr[[s2]]-1,dist[[s2]],dpcopy];
+				dpcopy=fetchRet["dp"];t+=fetchRet["opt"];
+				fetchRet=FetchOrSolve[s2,tmpArr[[s2]],dist[[s2]],dpcopy];
+				dpcopy=fetchRet["dp"];t-=fetchRet["opt"];
+				If[t<minExp,minExp=t;res[[1]]=s1;res[[2]]=s2;untouched=False]				
 			]];];		
+	(*CAUTION: If any expectaion of single sensor is infinity, the program will terminate.*)
 	If[untouched==True,
 		For[t=0;s1=0,s1<sensors,s1++;
-			fetchRet=FetchOrSolve[s1,crawlLimitsList[[s1]],dist[[s1]],expcopy];
-			expcopy=fetchRet["expTable"];t+=fetchRet["$R"]],
+			fetchRet=FetchOrSolve[s1,crawlLimitsList[[s1]],dist[[s1]],dpcopy];
+			dpcopy=fetchRet["dp"];t+=fetchRet["opt"]],
 		If[minExp<0,
 			tmpArr=solv["arrange"];
 			tmpArr[[res[[1]]]]++;
 			tmpArr[[res[[2]]]]--;];
 		For[t=0;s1=0,s1<sensors,s1++;
-			t+=expcopy[[s1,tmpArr[[s1]]]];];
-	];
+			t+=dpcopy[[s1,tmpArr[[s1]]]];];
+	];	
 	solv["opt"]=t;solv["arrange"]=tmpArr;
-	ret["$R"]=solv;ret["expTable"]=expcopy;(*Update Memo*)
+	ret["$R"]=solv;ret["dp"]=dpcopy;(*Update Memo*)
 	ret]
 
-FetchOrSolve[sensor_,crawls_,dist_,exptable_]:=Module[
-	{ret,t,expcopy},
-	expcopy=exptable;
-	If[exptable[[sensor,crawls]]==-1,
+(*
+Compute the distance to crawl a certain sensor with a fixed time with memo
+---
+sensor, index of target sensor
+crawls, number of total crawl of this sensor
+dist, M*M, M is time node of sensor
+dp, N*M, N is number of sensor & M is crawl number
+---
+ret, {"opt": 1, "$dp": N*M_i*M_i}, "opt" is the minimal value & dp is the meno
+*)
+FetchOrSolve[sensor_,crawls_,dist_,dp_]:=Module[
+	{ret,t,dpcopy},
+	dpcopy=dp;
+	If[dp[[sensor,crawls]]==-1,
 		t=CrawlUtility[crawls,dist];
-		expcopy[[sensor,crawls]]=t["opt"]];	
-	(*Print[ToString[expcopy[[sensor,crawls]]]];*)
-	ret["$R"]=expcopy[[sensor,crawls]];
-	ret["expTable"]=expcopy;
+		dpcopy[[sensor,crawls]]=t["opt"]];
+	ret["opt"]=dpcopy[[sensor,crawls]];
+	ret["dp"]=dpcopy;
 	ret]
 
-(*DP method for optimal scheduling for a single sensor*)
-(*N is crawls allowed to use, w is a distance matrix*)
+(*
+DP method for optimal scheduling for a single sensor
+---
+N, 1, crawls allowed to use
+w, M_i*M_i, a distance matrix of this sensor i
+---
+$R, {"opt": 1, "trajectory", T*1}, opt is minimal value & trajectory is the schedule for best
+*)
 CrawlUtility[N_,w_]:=Module[
 	{$R,M,f,p,n,m,k,minv=0,temp=0},	
 	M=Dimensions[w][[1]];	
-	$R["opt"]=\[Infinity];$R["arrange"]={};
+	$R["opt"]=\[Infinity];$R["trajectory"]={};
 	f=Array[\[Infinity]&,{M,N}];
 	p=Array[0&,{M,N}];
 	For[m=1,m<=M,m++,f[[m,1]]=w[[1,m]];p[[m,1]]=1];
@@ -165,7 +205,7 @@ CrawlUtility[N_,w_]:=Module[
 				If[temp<f[[m,n]],f[[m,n]]=temp;p[[m,n]]=k]]]];
 	$R["opt"]=f[[M,N]];
 	For[n=N;m=M,n>=1;m>=1,n--,
-		AppendTo[$R["arrange"],m];m=p[[m,n]]];
+		AppendTo[$R["trajectory"],m];m=p[[m,n]]];
 	$R]
 End[]
 EndPackage[]
@@ -180,7 +220,7 @@ Print[ToString[crawlLimitsList]];
 \[Epsilon]=2;
 maxIteration=50;
 TimeTable=Module[{
-	i,j,cycles,maxwperiod=10,minwperiod=3,maxwRange=10,minwRange=1,timeRange=200,
+	i,j,cycles,maxwperiod=10,minwperiod=3,maxwRange=10,minwRange=1,timeRange=100,
 	aList={},lList={},$tt={}},
 	For[i=0,i<sensors,i++;
 		cycles=RandomInteger[{minwperiod,maxwperiod}];
@@ -194,6 +234,9 @@ TimeTable=Module[{
 		AppendTo[$tt,Transpose[{aList,lList}]]];
 	$tt];
 tmpR["opt"]=\[Infinity];tmpR["arrange"]={};
-tmpR=DebugSchedule[lambdaList,TimeTable,crawlLimitsList,\[Theta],\[Delta],\[Epsilon],maxIteration,tmpR];
+tmpR=EasiCrawl[lambdaList,TimeTable,crawlLimitsList,\[Theta],\[Delta],\[Epsilon],maxIteration,tmpR];
 Print[tmpR["opt"]];
+
+
+
 

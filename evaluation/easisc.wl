@@ -2,17 +2,24 @@
 
 BeginPackage["EasiCrawlSchedule`"]
 
-EasiCrawlSchedule::usage=
-	"EasiCrawlSchedule[lambdaList_,timeTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_,$R_] "<>
+EasiCrawl::usage=
+	"EasiCrawl[lambdaList_,timeTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_,$R_] "<>
 	"return the optimal schedule distribution f[opt]=?, f[arrange]=?"
 
 Begin["`Private`"]
 
-(*Main entry*)
-DebugSchedule[lambdaList_,timeTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_,$R_]:=Module[
-	{oldOpt,sensors,t,i,dist={},expTable,ret},	
+(*
+Main entry
+lambdaList is the parameter of Poission Process,
+sleepPlan is the sleep plan schedule of devices,
+crawlLimitsList is the maximum times that a device can be crawled.
+*)
+EasiCrawl[
+	lambdaList_,sleepPlan_,crawlLimitsList_,
+	\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_,$R_]:=Module[
+	{oldOpt,sensors,t,i,dist={},expTable,ret},
 	Print["Discretize timeline."];
-	dist=DiscretizeTimeline[timeTable,lambdaList,\[Epsilon]];
+	dist=DiscretizeTimeline[sleepPlan,lambdaList,\[Epsilon]];
 	Print["Begin to compute expectation."];
 	$R["opt"]=\[Infinity];
 	$R["arrange"]=EvenlyDivide[\[Theta],Dimensions[lambdaList][[1]],crawlLimitsList];	
@@ -31,22 +38,6 @@ DebugSchedule[lambdaList_,timeTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,\[Epsi
 	Print["Arrange is " <> ToString[$R["arrange"]]];
 	$R]
 
-DebugIncremental[expTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,iteratorLimit_]:=Module[
-	{i=1,$oldR,$R},
-	(*$R=<|opt->\[Infinity],arrange->{}|>;*)
-	$R["arrange"]=EvenlyDivide[\[Theta],Dimensions[expTable][[1]]];
-	While[Abs[$R["opt"]-$oldR["opt"]]>=\[Delta]&&i<iteratorLimit,
-		$oldR=$R;
-		$R=ImproveSolution[$R,expTable,crawlLimitsList];
-		Print["Iteration No."<>ToString[i]<>" opt is "<>ToString[$R["opt"]]];i++;];
-	$R]
-
-DebugPreCompute[timeTable_,lambdaList_,\[Epsilon]_,\[Theta]_]:=Module[
-	{dist,expTable},
-	dist=DiscretizeTimeline[timeTable,lambdaList,\[Epsilon]];		
-	expTable=PrecomputeCostMatrix[dist,\[Theta]];
-	expTable]
-
 (*Utils function*)
 EvenlyDivide[N_,L_,crawlLimitsList_]:=Module[
 	{$arr,t,i},
@@ -59,7 +50,9 @@ EvenlyDivide[N_,L_,crawlLimitsList_]:=Module[
 			If[crawlLimitsList[[t]]>$arr[[t]],i--;$arr[[t]]++];]];
 	$arr]
 
-(*Discretization*)
+(*
+Discretization is used to find check points in the timeline
+*)
 DiscretizeTimeline[timeTable_,lambdaList_,stepLength_]:=Module[
 	{$dist={},candicateCnt,i,j,k,nodesCnt,
 	sensors,sensor,cycles,timeline,timeNode,workCycle,distanceMap},
@@ -174,7 +167,7 @@ CrawlUtility[N_,w_]:=Module[
 End[]
 EndPackage[]
 
-(*
+(**)
 sensors=10;
 lambdaList=RandomReal[0.9,{sensors}]+0.1;
 crawlLimitsList=RandomInteger[8,{sensors}]+1;
@@ -200,4 +193,4 @@ TimeTable=Module[{
 tmpR["opt"]=\[Infinity];tmpR["arrange"]={};
 tmpR=DebugSchedule[lambdaList,TimeTable,crawlLimitsList,\[Theta],\[Delta],\[Epsilon],maxIteration,tmpR];
 Print[tmpR["opt"]];
-*)
+

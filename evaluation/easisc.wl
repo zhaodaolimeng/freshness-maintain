@@ -7,11 +7,10 @@ EasiCrawl::usage=
 	"return the optimal schedule distribution f[opt]=?, f[arrange]=?"
 
 Begin["`Private`"]
-
 (*
 Main entry
 lambdaList is the parameter of Poission Process,
-sleepPlan is the sleep plan schedule of devices,
+sleepPlan is a n*n*2
 crawlLimitsList is the maximum times that a device can be crawled.
 *)
 EasiCrawl[
@@ -38,15 +37,19 @@ EasiCrawl[
 	Print["Arrange is " <> ToString[$R["arrange"]]];
 	$R]
 
-(*Utils function*)
-EvenlyDivide[N_,L_,crawlLimitsList_]:=Module[
-	{$arr,t,i},
-	(*$arr=Array[Floor[N/L]&,{L}];For[t=Mod[N,L];i=1,t>0,t--;$arr[[i]]++;i++];*)
-	If[Total[crawlLimitsList]<=N,
+(*
+Frist arrangement, divide the crawls as even as possible
+totalCrawls is the total number allowed
+crawlLimitsList is the crawls can be taken to each sensor
+*)
+EvenlyDivide[totalCrawls_,crawlLimitsList_]:=Module[
+	{$arr,t,i,sensors},
+	sensors = Dimensions[crawlLimitsList][[1]];
+	If[Total[crawlLimitsList]<=totalCrawls,
 		$arr=crawlLimitsList,
-		$arr=Array[0&,{L}];
-		For[i=N;t=1,i>=0,t++;
-			If[t>L,t=1];
+		$arr=Array[0&,{sensors}];
+		For[i=totalCrawls;t=1,i>=0,t++;
+			If[t>sensors,t=1];
 			If[crawlLimitsList[[t]]>$arr[[t]],i--;$arr[[t]]++];]];
 	$arr]
 

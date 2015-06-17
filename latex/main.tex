@@ -146,7 +146,7 @@ Pull-based architecture use semantic description, i.e. XML, to describe IoT sens
 
 We also look into technologies used in LAN to automate home devices, which may also be used in IoT applications. For example, UPnP\cite{UPnP}, Bonjour\cite{Bonjour} and other prevalent network configure protocols. But they are not perfectly suitable for IoT applications, mainly because the device description language can not define the realtime state of IoT devices. Also, most of this configure protocol can only be used in LAN environment, with limit amount of devices.
 
-\section{Preliminaries and Measurements}
+\section{Formulation and Measurements}
 EasiSC are implemented on a pull-based IoT search architecture, where any events captured by IoT devices are stored in their semantic descriptions. Crawlers periodically visit a device to copied the description to the server.
 In addition, we setup the follow assumptions to simplify the device model. 
 (1) Events that users care arrived at each IoT device in a Poisson manner, where the time interval between any two event follows exponential distribution. 
@@ -154,31 +154,12 @@ In addition, we setup the follow assumptions to simplify the device model.
 (3) User only cares about the event latency, which is the object function for optimization.
 
 
-EasiSC is periodically scheduled with the same strategy, so only time period $[0, T]$ is discussed in the following paper.
-Suppose there are totally $N$ devices needs to be re-crawled, while crawler can perform at most $M$ times of crawls during the period $[0, T]$. Our goal is to find a schedule strategy $\phi$, so the latency of all $N$ IoT devices is minimized.
-
-
-The latency talked in this paper is defined as the expectation of the duration from when the events are captured by devices to the time when crawler copy these events to the server side repository. In other words, the latency is opposite to the freshness of all the events user get from the repository.
-In this paper, we mainly study the measurements of latency expectation when the sleep pattern is previously known.
-To measure the latency expectation at a certain time $t$, we define $E_f(t, t_s)$ as the expectation when crawler crawls the IoT device at time $t$, and $t_s$ is the last time this device is crawled. In addition, we use the annotation $G(t)$ as latency expectation for crawling at time $t$.
-
-This is a well-studied problem which has been studied by \cite{Cho2000, Wolf2002}. Our key idea is to check the expectations when different number of events happened, and add these expectations up. Details are presented in the appendices. 
-
-
-
-
-
-
-\section{EasiSC: A Scheduling Strategy for\\IoT Crawlers}
-
-We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or unperiodic sleep devices. At last, we discuss the strategy for devices whose sleep plan is previously unknown.
-\subsection{Global Solutions}
-
-Suppose the crawlers commit $n$ crawling actions during time period $[0, T]$. With strategy $\phi$, for each time the repository latency is $E(\phi)$, where $i=1,\ldots,n$. 
-$\phi$ is an access sequence for different devices, where each $\phi_{i,j}\in{0,1}$. If sensor $i$ is planned to be crawled at time $j$, then $\phi_{i,j}=1$, where time $j$ belongs to a discrete time table $\mathbf{T}$, which is all the possible time that strategy $\phi$ can be implied at.
-The access count of all the sensors during $[0, T]$ can be defined as $\Arrowvert\phi\mathbf{T} \Arrowvert_{1}$. We can define the count of sensor $S_k$'s access time $\sum_{i=1}^{N}\phi_{i,k}$, just in the same way as the total time. 
-Considering the difference between sensors, we define $\omega_i$ as the expectation weight of sensor $i$. Then the final object function can be evaluated as $\Arrowvert \omega_i E(\phi) \Arrowvert_{1}$.
-
+EasiSC is periodically scheduled with the same strategy, only time period $[0, T]$ need to be discussed.
+Suppose there are totally $N$ devices needs to be re-crawled, while crawler can perform at most $M$ times of crawls during the period $[0, T]$. Our goal is to find a schedule strategy $\phi$, so the latency expectation of all $N$ IoT devices is minimized. 
+For the model simplicity, a discretization method is implied. We set up a discrete time table $\mathbf{T}$, each crawl must preformed at the time point in the time table.
+Crawl schedule $\phi_{i,j}\in\{0,1\}$, and $\phi_{i,j}=1$ means device $i$ will be crawled at time $j$, where time $j\in\mathbf{T}$.
+The total access count of all $N$ devices during $[0, T]$ can be represented as $\Arrowvert\phi\Arrowvert_{1}$. For each device $i$, the total crawl time is marked as $\sum_{i=1}^{N}\phi_{i,k}$. 
+Considering the difference between sensors, we define $\omega_i$ as the expectation weight of sensor $i$. The latency expectation, which is the final object function, can be evaluated as $\Arrowvert \omega_i E(\phi) \Arrowvert_{1}$, where $\omega_i$ is the weight parameter for the latency of device $i$.
 
 In addition, this problem must follow several constraints. Server load and IoT devices' energy consumption are two main limitations to consider as discussed above. 
 The energy constraint of the sensor can be formalized directly: any IoT devices cannot be accessed too frequently, which means any period $[0, T]$, the access time $C_i$ for sensor $i$ is limited to be accessed less than $\gamma_i$ times. For the server load, our settings are similar to the formal research\cite{Wolf2002}, where the crawlers from the server can not commit more that $\theta$ crawls during time period$[0, T]$.
@@ -193,9 +174,23 @@ With the object function and constraints, we get the following optimization prob
 \end{array}\label{OBJ}
 \end{eqnarray}
 
-Problem \eqref{OBJ} is a generalized formulation, which does not content specific event model and sleep behavior of IoT devices. In the follow section, we will start from a simplest periodic event capture model and look into the complete form of \eqref{OBJ}.
+Problem \eqref{OBJ} is a generalized formulation, which does not content specific device model and sleep behavior of IoT devices. Due to different requirements between IoT applications, it's not rational to use an universal model to formalize the sleep pattern. For many devices, the sleep pattern is unknown, while others may have been per-arranged.  In the follow section, different working model of device is discussed. 
 
-% With the relationship between number of crawls and expectation latency, we can get the optimal strategy for all sensors
+The latency talked in this paper is defined as the expectation of the duration from when the events are captured by devices to the time when crawler copy these events to the server side repository. In other words, the latency is opposite to the freshness of all the events user get from the repository.
+In this paper, we mainly study the measurements of latency expectation when the sleep pattern is previously known.
+To measure the latency expectation at a certain time $t$, we define $E_f(t, t_s)$ as the expectation when crawler crawls the IoT device at time $t$, and $t_s$ is the last time this device is crawled. In addition, we use the annotation $G(t)$ as latency expectation for crawling at time $t$.
+
+Computing latency expectation of a continuously working device is a well-studied problem\cite{Cho2000, Wolf2002}. 
+This value can be deducted by summing up checking the conditional expectations of different number of events happened during the work time. 
+For sleep enabled case, instead of using the complex close form expression to calculate latency expectation, we developed an relaxed measurement, which neglect the exponential part, value of which is close to $0$ when $t$ is relatively large. Fortunately, the latency expectation of a sleep enabled device is convex function of $t$.
+The details of latency measurement are presented in the appendices. 
+
+\section{EasiSC: A Scheduling Strategy for\\IoT Crawlers}
+
+We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or none-periodic sleep devices. At last, we discuss the strategy for devices whose sleep plan is previously unknown.
+
+\subsection{Global Solutions}
+EasiSC compute for optimal or near optimal schedule strategy providing different models, given a fixed crawl time.
 In previous section, we figure out the relationship between the number of crawls and the expectation of latency $E_L(n)$. 
 Now the object function of formulation \ref{OBJ} can be rewrite as $\sum_{i=1}^{N} \omega_i E_L(n_i)$. The bandwidth constraint can be taken as $\sum_{i=1}^{N} n_i < M$ and the energy constraint of single sensor can be rewrite as $n_i<\gamma_i$.
 
@@ -204,13 +199,10 @@ Once crawl times $n$ is chosen, then the optimal crawl strategy for a single sen
 The big figure is to dispatch crawl time and continuously refine the dispatch strategy until no improvement can be made.
 First we dispatch the $M$ crawl time to $N$ sensors according to $\omega_i$. Then we start to search sensors for a pair $i$, $j$. If $i\gets i-1$ and $j\gets j+1$ will cause a largest improvement to the object function compared to the other pairs, then changes of $i$ and $j$ are conformed. Continue this process until none improvement can be made.
 
-
 \subsection{Periodic Sleep Devices}
 
-Next, we introduce the crawling strategy for single device, in variety situations, which is the subroutine of ??????the global algorithm.%%%%%%.
-Due to different requirements between IoT applications, it's not rational to use an universal model to formalize the sleep pattern. For many devices, the sleep pattern is unknown, while others may have an per-arranged. 
+Next, we introduce the crawling strategy for single device under different situations.
 We first focused on the scheduling of arranged sleep pattern, which are more likely to bring potential freshness gain through fixed amount of crawl actions.
-
 In the situation when IoT devices continuously work, an intuition is to evenly distributed the crawling action across the crawling schedule. Here a proof of this proposition is given.
 
 \begin{lemma}
@@ -229,31 +221,18 @@ Now suppose there are $n$ crawling action, among which first $n-1$ action evenly
 \end{proof}
 
 
-With \ref{evenly}, we can get the exact increment of expectation when different crawling times are implied to a same sensor. This can be used to minimize the overall expectation of repository latency, which formalized as $\Arrowvert \phi\mathbf{T} \Arrowvert_{1}$ above.
+With Lemma \ref{evenly}, we can get the exact increment of expectation when different crawling times are implied to a same sensor. This can be used to minimize the overall expectation of repository latency, which formalized as $\Arrowvert \phi\mathbf{T} \Arrowvert_{1}$ above.
 Here the relationship between crawling time and $E[\phi(n)]$ can be computed simply as follows, where $\phi(n)$ stands for the optimal strategy with $n$ crawls, and $T$ is the time period within consideration. 
 \begin{equation}
 E[\phi(n)]=nE[G(\frac{T}{n})]\label{NonHib}
 \end{equation}
 Function \eqref{NonHib} can be rewrite to an close-form expression as $T(T\lambda/n-1+e^{-T\lambda/n})$, which is convex. with this function, the minimum expectation can be calculated directly.
 
-\subsection{Non-periodic Sleep Devices}
 Here we also study the relationship between $n$ and the minimum latency expectation, but try to be more pragmatic.
-With the optimal strategy $\phi_i(n)$ for sensor $i$ which is only related to the crawling time $n$, we can substitute functions \eqref{Eftts} and \eqref{EGHSimple} into \eqref{OBJ} to get the latency expectation of non-hibernation version. 
+With the optimal strategy $\phi_i(n)$ for sensor $i$ which is only related to the crawling time $n$, we can substitute functions \eqref{Eftts} and \eqref{ExpectCont} into \eqref{OBJ} to get the latency expectation of non-hibernation version. 
 But with hibernation, at some time points the sensors can not be accessed, resulting in a complex piecewise expectation function, which makes the relationship between $n$ and $\phi_i(n)$ unclear and completely theoretical approach likely impossible.
 Here we focus on the situation when $T_w<T_h$ and $n<T/\Delta T$. Applications which hold $T_w\leq T_h$ is rare, while if $n<T/\Delta T$ is just the same as the push situation we talked before.
 A concrete formulation extends from \ref{OBJ} is as follows, where $\mathbf{t}$ is the set of target time sequence that a crawl action can be scheduled to, and $k\leq 0$.
-
-\begin{eqnarray}
-\begin{array}{ll}
-\min_{\mathbf{t}}& E_f(T,t_n)+\sum_{i=1}^{n-1}E_f(t_{i+1},t_{i}) \\
-\text{s.t.} 
-&t_1,t_2,\ldots,t_n\in \mathbf{t}, n>0\\
-&0<t_1<t_2<\ldots<t_n<T\\
-&t_i\in[t_s+k \Delta T, t_s+T_w+k\Delta T]\text{, }t_i\in{\mathbf{t}}
-\end{array}\label{OBJext}
-\end{eqnarray}
-
-We first look into sub-problems in privilege to design algorithm for problem \ref{OBJext}.
 Here an intuition of the problem is to arrange the crawls at the end of a work cycle, we show this intuition is indeed an optimal strategy when the crawl interval is an integral multiple of duty cycle $\Delta T$. We uses the same symbols as the previous.
 
 \begin{lemma}
@@ -293,9 +272,7 @@ With these observations, we can design a strategy that in some circumstances, th
 
 The result can be computed in one pass, so the complexity of this approach is $O(n)$, where $n$ is the size of crawl times.
 
-%%\subsection{Non-periodic Hibernate Sensors}
-% When the working time can be seen as a point in timeline, original problem can be transform to a selection problem.
-% The transform should be defined.
+\subsection{Non-periodic Sleep Devices}
 Our hibernation model is periodic and predictable in the previous example. However, in a real world IoT system, duty cycle in a hibernation mechanism is very likely to be non-periodic, and hibernation time will be the major action of the sensor, where $T_h\gg T_w$ holds. Also the crawling interval maybe much larger than $T_h$. 
 If the length of working cycles are neglected and represented as time points, then problem of searching optimal crawling can be transformed to a search problem, which can be solved by dynamic programming.
 
@@ -408,38 +385,55 @@ E[G(t)] = (e^{-t\lambda}-1+t \lambda)t \numberthis \label{ExpectCont}
 
 \subsection{Latency Expectation With Sleep Mode}
 For the sleep situation, device starts to work at time $t_s$, and begin to work with a sleep plan.
-Here we mark $T^{c}_{i}$ as the $i$-th working cycle. $\Delta T^{c}_{i} = T^{w}_{i}+T^{s}_{i}$, where $T^{w}_{i}$ is the $i$-th time periods when a device is awake and $T^{w}$ is the $i$-th sleeping cycle. 
+Here we mark $T^{c}_{i}$ as the $i$-th working cycle. $\Delta T^{c}_{i} = T^{w}_{i}+T^{s}_{i}$, where $T^{w}_{i}$ is the $i$-th working cycle and $T^{w}$ is the $i$-th sleeping cycle. 
 It's hard to directly deduce an expectation for a Poisson process whose timeline is break up. However, with equation \eqref{ExpectCont}, we can compute the $E_f(t, t_s)$ by subtract the expectation cause by the previous crawls from $E[G(t)]$. In this recursive way, the expectation can be calculated. Here $E_s[G(t)]$ stands for the expectation to crawl a sleep enabled device at time $t$, $E[G(t)]$ still stands for the expectation if this particular device doesn't sleep.
-Suppose start time $t_s=0$, $E_f(t_s,t)$ can be written as $E_s[G(t)]$, with the method above, the problem can be induced as the following if time $t$ is in an working period, which is written as $t \in [t_s + \sum_{i=1}^{k} T^{c}_{i}, t_s + \sum_{i=1}^{k} T^{c}_{i} + T^{w}_{i})$, where $k\in\mathbb{N}$.
+Start time $t_s=0$, $E_f(t_s,t)$ can be written as $E_s[G(t)]$.Suppose time $t$ locates in an working period, written as $t \in [t_s + \sum_{i=1}^{k} T^{c}_{i}, t_s + \sum_{i=1}^{k} T^{c}_{i} + T^{w}_{i}]$, where $k\in\mathbb{N}$. This assumption is based on the fact that, any crawl at a sleeping cycle can be bring forward to last work cycle for a better latency expectation.
 \begin{align*}
 E_h[G(t)] & = E[G(t-T^{L}(K))] + \\
 	& \sum_{i=1}^{K}(E[G(t-T^{L}(K-i))]-\\
-	& E[G(t-T^{L}(K-i)-T_w)]) \numberthis \label{ExpectSleep}
+	& E[G(t-T^{L}(K-i)-T^{w}_{K-i})]) \numberthis \label{ExpectSleep}
 \end{align*}
 
-%\begin{align*}
-%E_h[G(t)] & = E[G(t-K T^{c})] + \\
-%& \sum_{i=1}^{K}(E[G(t-(K-i)\Delta T)]-\\
-%& E[G(t-(K-i)\Delta T-T_w)]) \numberthis \label{ExpectSleep}
-%\end{align*}
-Here $T^{L}(K) = \sum_{j=1}^{K} T^{c}_{j}$, which is time duration of first $K$ cycles, where $K$ is the count of integrated cycle $T^{C}$. Notice that for any other $t$, $E_h[G(t)]=0$, because crawlers are not allowed to access a hibernating sensor. For any time $t$ in a sensor working cycle, by summing those expectations caused by working cycle before $t$, we can get the overall expectation of out-of-time level when considering sensor's hibernation. 
+Here $T^{L}(K) = \sum_{j=1}^{K} T^{c}_{j}$, which is time duration of first $K$ cycles, and $K$ is the count of cycle $T^{C}$. 
+For any time $t$ in a sensor working cycle, by summing those expectations before $t$, the overall expectation of latency can be achieved when take device sleep cycle into consideration. The first factor of \eqref{ExpectSleep} is the expectation of last working cycle, and the sum is the expectation of the previous working cycle.
 
-\subsection{Crawls in an Arbitrary Period}
 
-At last, we consider the original problem of computing $E_f(t,t_s)$ if $t\ne0$. This problem be divided into two situation according to the value of $t_s$, if $t_s$ is at a working cycle, the expectation can be estimate by $E_h[G(t)]$ which start at $0$ and subtract the expectation latency cause by the events arriving at time $[0, t_s)$, which is $E_f(t,t_s)=E_h[G(t'')]-(E[G(t'')]-E[G(t-t_s)])]$. 
+Expression \eqref{ExpectSleep} is too complex for practical use, so we figure out a way to simplify this. 
+We assume $t\lambda$ is relatively large, which means in a work cycle multiply events are trends to be captured.
+Notice that if $t\rightarrow \infty$, $e^{-t\lambda}-1+t \lambda \rightarrow 0$, which means expectation \eqref{ExpectCont} can be approximated by a quadratic expression $t^2\lambda$.
+With this observation, the expectation gain of a previous work cycle can be approximated using $E[G(t)]-E[G(t-\delta)] = \delta (2 t - \delta)\lambda$, which is a linear function of $t$. Here $\delta$ is the length of working cycle.
+This indicates that latency expectation of a sleep enabled device can actually be approximated by a piecewise linear function.
+According to equation \eqref{ExpectSleep}, each segment of the approximate function is the sum of different non-decrease linear expressions.
+By taking approximation of $E[G(t)]-E[G(t-\delta)]$ into \eqref{ExpectSleep}, an approximation of $E_h[G(t)]$ is achieved as the follows.
+\begin{align*}
+E_h[G(t)] = (t-T^{L}(K))^2\lambda + \sum_{i=1}^{K} (2 t - T^{w}_{K-i})T^{w}_{K-i}\lambda
+\numberthis 
+\label{ExpectSleepApprox}
+\end{align*}
 
-We define $t'=t_s-t_s\bmod\Delta T$ and $t''=t-\floor{t_s/\Delta T}\Delta T$ for convenience. Here the minuend means the expectation at time point $t$ of latency during time period $[0, t_s]$.
+Function \eqref{ExpectSleepApprox} can be proofed convex using the convexity preserve operations \cite{boyd2004convex}. Provided that $(t-T^{L}(K))^2\lambda$ and $(2 t - T^{w}_{K-i})T^{w}_{K-i}\lambda$ are nonnegative functions, the convexity of function \eqref{ExpectSleepApprox} holds.
+
+\subsection{Latency Expectation in an Arbitrary Period}
+The problem of computing $E_f(t,t_s)$ if $t\ne0$, can be solved given the previous analysis. This problem be divided into two situation according to the value of $t_s$.
+Assume that $t_s\in [0,T^{c}_{1}]$, other case can be transformed to this by shifting $t_s$ and $t$.
+If $t_s$ is in a sleeping cycle, then expectation can just be calculated from the next work cycle.
+Otherwise, if $t_s$ is in a working cycle, the expectation can be estimate by $E_h[G(t)]$ which start at $0$ subtract the latency expectation cause by the events arriving at time $[0, t_s)$.
+% which is $E_f(t,t_s)=E_h[G(t'')]-(E[G(t'')]-E[G(t-t_s)])]$. 
+
+% We define $t'=t-(t_s\bmod\Delta T^{c}_{1})$ and $t''=t-\floor{t_s/\Delta T}\Delta T$ for convenience. 
+
+We define $t'=t-(t_s\bmod\Delta T^{c}_{1})$ and $t''=t-T^{c}_{1}$ for convenience. 
+Here the minuend means the expectation at time point $t$ of latency during time period $[0, t_s]$.
 If $t_s$ is at a hibernate cycle, then the result expectation is just as the one which $t_s$ equals next duty cycle, which is $E_h[G(t')]$, which can be written as follows.
 \[E_f(t,t_s)=\left\{
     \begin{array}{lr}
-    E_h[G(t')]\text{ if } t_s\bmod\Delta T\in [T_w, \Delta T)\\
+    E_h[G(t')]\text{ if } t_s\in [T^{w}_{1}, T^{c}_{1})\\
     E_h[G(t'')]-E[G(t'')]+E[G(t-t_s)]\\
     \text{ otherwise }
     \end{array}\numberthis \label{Eftts}
     \right.
 \]
 
-
-Combine expression \eqref{EGH} and \eqref{Eftts}, the expectation of freshness latency is defined in the problem of hibernate involved crawling.
+Combine expression \eqref{ExpectSleep} and \eqref{Eftts}, the expectation of freshness latency is defined in the problem of hibernate involved crawling.
 
 \end{document}

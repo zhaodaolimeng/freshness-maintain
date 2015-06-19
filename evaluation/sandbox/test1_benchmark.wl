@@ -5,7 +5,7 @@ BeginPackage["Benchmark`",{"Easi`"}]
 Only expectation function is implied as a final measurement,
 to check the actually event version, see test_benchmark_discrete
 *)
-BestExpectScale::usage="BestExpectScale[sensorSettings_,minRange_,timeRange_]"
+BestExpectScale::usage="BestExpectScale"
 (*
 TestTotalCrawlNumber::usage="TestTotalCrawlNumber[sensorSettings_,minCrawl_,maxCrawl_]"
 TestDiscretization::usage="TestDiscretization[sensorSettings_, minEps_, maxEps_]"
@@ -126,7 +126,7 @@ EndPackage[]
 
 
 SetDirectory[NotebookDirectory[]];
-<<"easisc.wl";
+
 (*Sensor Scale Test*)
 Module[{
 	\[Delta],\[Epsilon],maxiter,maxwPeriod,minwPeriod,maxwRange,minwRange,timeRange,
@@ -159,7 +159,7 @@ Module[{
 	For[counts=0,counts<5,counts++;
 		retArr=Benchmark`BestExpectScale[
 			\[Delta],\[Epsilon],maxiter,scaleList,
-			maxwPeriod\:ff0cminwPeriod,maxwRange,minwRange,timeRange,
+			maxwPeriod,minwPeriod,maxwRange,minwRange,timeRange,
 			maxCrawl,minCrawl,maxCrawlSingle,minCrawlSingle,maxLambda,minLambda];
 		Print[retArr];
 		For[i=1,i<Length[scaleList],i++;

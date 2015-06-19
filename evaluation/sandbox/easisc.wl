@@ -1,44 +1,39 @@
 (* ::Package:: *)
 
-BeginPackage["EasiSC`"]
-
+BeginPackage["Easi`"]
 EasiCrawl::usage="EasiCrawl return the optimal schedule distribution f[opt]=?, f[arrange]=?"
-
 Begin["`Private`"]
 (*
 Main entry
 ---
 lambdaList, parameter of Poission Process,
-sleepPlan, n*m*2, n is sensors, m[[1]] is duty cycles & m[[2]] is working time
+timeTable, n*m*2, n is sensors, m[[1]] is duty cycles & m[[2]] is working time
 crawlLimitsList, maximum times that a device can be crawled for each sensor.
-totalCrawls, maximal crawl amount that is OK for server.
-stepLength, the grantity of discretization.
-improveThreshold, threshold of the iterative method
+\[Theta], maximal crawl amount that is OK for server.
+\[Delta], the grantity of discretization.
+\[Epsilon], stop threshold of the improvement iterative method
 iteratorLimit, maximal iteration times
 $R, parameter for function style return.
 ---
 $R, {"opt": 1, "arrange": N*1}, N is sensor number
 *)
-EasiCrawl[
-	lambdaList_,sleepPlan_,crawlLimitsList_,totalCrawls_,
-	stepLength_,improveThreshold_,iteratorLimit_,$R_]:=Module[
-	{oldOpt,sensors,i,distanceMatrix,dp,ret},	
+EasiCrawl[lambdaList_,timeTable_,crawlLimitsList_,\[Theta]_,\[Delta]_,\[Epsilon]_,iteratorLimit_]:=Module[{	
+	oldOpt,sensors,i,distanceMatrix,dp,ret,$R},
 	Print["Starting ..."];
-	distanceMatrix=DiscretizeTimeline[sleepPlan,lambdaList,stepLength];
-	Print["Distance matrix built ..."];
+	distanceMatrix=DiscretizeTimeline[timeTable,lambdaList,\[Epsilon]];
 	$R["opt"]=\[Infinity];
-	$R["arrange"]=EvenlyDivide[totalCrawls,crawlLimitsList];
+	$R["arrange"]=EvenlyDivide[\[Theta],crawlLimitsList];
 	dp={};(*Memo of time table, n*m, the minimal expectation can achieved*)
 	sensors=Dimensions[lambdaList][[1]];
 	oldOpt=0;
 	For[i=0,i<sensors,i++;
 		AppendTo[dp,Array[-1&,{crawlLimitsList[[i]]}]];];
-	For[i=0,Abs[$R["opt"]-oldOpt]>=improveThreshold&&i<iteratorLimit,i++;
+	For[i=0,Abs[$R["opt"]-oldOpt]>=\[Delta]&&i<iteratorLimit,i++;
 		oldOpt=$R["opt"];
 		ret=ImproveSolution[$R,dp,distanceMatrix,crawlLimitsList];
 		$R=ret["$R"];
 		If[i==1, Print["Before improve, Opt is "<>ToString[$R["opt"]]]];
-		dp=ret["dp"]		
+		dp=ret["dp"]
 	];	
 	Print["After improve, Opt is "<> ToString[$R["opt"]]];
 	Print["Arrange is " <> ToString[$R["arrange"]]];
@@ -76,8 +71,7 @@ DiscretizeTimeline[sleepPlan_,lambdaList_,stepLength_]:=Module[
 	{$dist={},candicateCnt,i,j,k,nodesCnt,
 	sensors,sensor,cycles,timeline,timeNode,workCycle,distanceMap},
 	sensors=Dimensions[sleepPlan][[1]];
-	For[sensor=0,sensor<sensors,sensor++;
-		Print["Build distance map for sensor"<> ToString[sensor]];
+	For[sensor=0,sensor<sensors,sensor++;		
 		timeNode={};
 		candicateCnt=0;
 		timeline=sleepPlan[[sensor]];
@@ -210,7 +204,9 @@ CrawlUtility[N_,w_]:=Module[
 End[]
 EndPackage[]
 
-(**)
+
+
+(*
 sensors=10;
 lambdaList=RandomReal[0.9,{sensors}]+0.1;
 crawlLimitsList=RandomInteger[8,{sensors}]+1;
@@ -220,7 +216,7 @@ Print[ToString[crawlLimitsList]];
 \[Epsilon]=2;
 maxIteration=50;
 TimeTable=Module[{
-	i,j,cycles,maxwperiod=10,minwperiod=3,maxwRange=10,minwRange=1,timeRange=100,
+	i,j,cycles,maxwperiod=10,minwperiod=3,maxwRange=10,minwRange=1,timeRange=200,
 	aList={},lList={},$tt={}},
 	For[i=0,i<sensors,i++;
 		cycles=RandomInteger[{minwperiod,maxwperiod}];
@@ -233,10 +229,6 @@ TimeTable=Module[{
 			]];
 		AppendTo[$tt,Transpose[{aList,lList}]]];
 	$tt];
-tmpR["opt"]=\[Infinity];tmpR["arrange"]={};
-tmpR=EasiCrawl[lambdaList,TimeTable,crawlLimitsList,\[Theta],\[Delta],\[Epsilon],maxIteration,tmpR];
+tmpR=EasiCrawl[lambdaList,TimeTable,crawlLimitsList,\[Theta],\[Delta],\[Epsilon],maxIteration];
 Print[tmpR["opt"]];
-
-
-
-
+*)

@@ -183,7 +183,7 @@ CrawlUtility[N_,w_]:=Module[
 End[]
 EndPackage[]
 
-(*
+(**)
 sensors=10;
 lambdaList=RandomReal[0.9,{sensors}]+0.1;
 crawlLimitsList=RandomInteger[8,{sensors}]+1;
@@ -209,4 +209,7 @@ TimeTable=Module[{
 tmpR["opt"]=\[Infinity];tmpR["arrange"]={};
 tmpR=DebugSchedule[lambdaList,TimeTable,crawlLimitsList,\[Theta],\[Delta],\[Epsilon],maxIteration,tmpR];
 Print[tmpR["opt"]];
-*)
+
+
+
+

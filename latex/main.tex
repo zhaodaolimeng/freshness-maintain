@@ -60,7 +60,7 @@
 % \title{Repository Freshness Maintain in a CoAP-based\\ IoT Search System}
 % \title{Repository Freshness Maintain in a Web-based\\ IoT Search System}
 % \title{EasiCS: An IoT Crawler Scheduling Method}
-\title{EasiSC: A Sleep-aware Schedule Method for \\Recrawling IoT Devices}
+\title{EasiCrawl: A Sleep-aware Schedule Method \\for Crawling IoT Devices}
 
 % author names and affiliations
 % use a multiple column layout for up to three different
@@ -81,8 +81,8 @@
 The search of IoT(Internet of things) is an important way for people to exploit useful devices. In this paper, we study the problem of crawling the content of low power IoT devices, which is a fundamental step towards building a generic IoT search engine.
 The crawl of IoT devices is very different from that of Web. Many low-power devices may sleep periodically, causing invalid crawls and unreliably latency. Also, in IoT systems, energy consumption of crawl access becomes nonnegligible.
 With these low-power devices widely used in IoT systems, traditional crawling schedule strategy is not suitable.
-In this paper, a new scheduling method, EasiSC, is proposed to solve the scheduling problem of crawling periodically sleep IoT devices. The crawling problem with energy limits is formulated as a constraint optimization problem. We use the expectation of latency to measure the realtime performance of crawler scheduling. With this measurement as optimization goal, EasiSC can get the near optimal latency expectation, which is more device friendly and suitable for IoT search than traditional web search scheduling.
-At last, EasiSC is evaluated with simulations. A case study is also performed with real world data from xively.com.
+In this paper, a new scheduling method, EasiCrawl, is proposed to solve the scheduling problem of crawling periodically sleep IoT devices. The crawling problem with energy limits is formulated as a constraint optimization problem. We use the expectation of latency to measure the realtime performance of crawler scheduling. With this measurement as optimization goal, EasiCrawl can get the near optimal latency expectation, which is more device friendly and suitable for IoT search than traditional web search scheduling.
+At last, EasiCrawl is evaluated with simulations. A case study is also performed with real world data from xively.com.
 % At last, we use simulations to test the expectation of latency of our new scheduling method, which illustrates the effectiveness for repository freshness and lower energy impact on the IoT sensors.
 \end{abstract}
 
@@ -97,7 +97,7 @@ Smart home applications need searchable sensors and devices to detect human acti
 
 
 % why our problem is important
-However, the design of IoT search engine is not a trivial problem, even with the help of standardized protocols and semantic descriptions of devices. The main problem lay in the internal instinct of IoT. Firstly, IoT devices is not connected by their content, which is precisely what user cares, link-based crawl method is infeasible for IoT search engine. Secondly, IoT devices, whose content can be highly dynamic, behaves differently from Web page, many of them may enter sleep mode periodically, meanwhile the realtime performance of search is a critical measurement. In this paper, we propose EasiSC, which is devoted to solve the sleep-aware IoT crawl problem.
+However, the design of IoT search engine is not a trivial problem, even with the help of standardized protocols and semantic descriptions of devices. The main problem lay in the internal instinct of IoT. Firstly, IoT devices is not connected by their content, which is precisely what user cares, link-based crawl method is infeasible for IoT search engine. Secondly, IoT devices, whose content can be highly dynamic, behaves differently from Web page, many of them may enter sleep mode periodically, meanwhile the realtime performance of search is a critical measurement. In this paper, we propose EasiCrawl, which is devoted to solve the sleep-aware IoT crawl problem.
 
 % practicability
 The built of generic IoT search engine is technically practical. Previous research use semantics\cite{Pfisterer2011} to enhance IoT device description methods. The conception ``description" as an abstraction of the state of a sensor.
@@ -123,13 +123,13 @@ Considering the stability and standardization advantages, in this paper the pull
 We assume the user only interest in the events monitored by corresponded sensors, which arrives periodically or just randomly. With the help of semantic IoT method, IoT sensors capture the event stream, and continuously store these events, and update their description files correspondingly. In this manner, the description file reveal the realtime state of sensors. IoT search engine regularly access the IoT descriptions, then updates the related repository. CoAP with CoRE resource description method can be used as standardized protocol for sensors and devices, and the description messages are listed in the ./well-know file used in the CoRE framework. 
 
 
-EasiSC is a scheduling strategy implemented at the server side as a role of IoT Crawl Scheduler. Our design principle is to minimize the information latency during  a period while meet the energy constraint of IoT devices, given sensor sleeping schedule and the frequency of event. Here we clarify that, if a device is sleeping, we indicate that all its communication and event detection function are disabled.
-The insight of the solution lies in the convexity of the function between crawl times and latency for a single device. If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: (1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? (2) What's the best scheduling strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiSC is implemented in a iterative way based on these analyze. For each steps, EasiSC compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.
-Our paper is organized as follows. We formalize the optimization problem in section II, then introduce EasiSC in section III. Simulations and a case study are preformed in section IV. 
+EasiCrawl is a scheduling strategy implemented at the server side as a role of IoT Crawl Scheduler. Our design principle is to minimize the information latency during  a period while meet the energy constraint of IoT devices, given sensor sleeping schedule and the frequency of event. Here we clarify that, if a device is sleeping, we indicate that all its communication and event detection function are disabled.
+The insight of the solution lies in the convexity of the function between crawl times and latency for a single device. If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: (1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? (2) What's the best scheduling strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiCrawl is implemented in a iterative way based on these analyze. For each steps, EasiCrawl compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.
+Our paper is organized as follows. We formalize the optimization problem in section II, then introduce EasiCrawl in section III. Simulations and a case study are preformed in section IV. 
 
 This paper has three contributions.
 (1) Although crawler scheduling problem is well studied in the field of IR, to our best knowledge, our paper is the first to consider the crawling problem in IoT system and formalize it as an constraint optimization problem.
-(2) A practical heuristic approach EasiSC for crawler scheduling under different circumstances is proposed for this model, which is evaluated in simulation.
+(2) A practical heuristic approach EasiCrawl for crawler scheduling under different circumstances is proposed for this model, which is evaluated in simulation.
 (3) We studied the real world data crawled from the IoT platform xively.com, which indicates the feasibility of our methods.
 
 \section{Related Work}
@@ -147,14 +147,14 @@ Pull-based architecture use semantic description, i.e. XML, to describe IoT sens
 We also look into technologies used in LAN to automate home devices, which may also be used in IoT applications. For example, UPnP\cite{UPnP}, Bonjour\cite{Bonjour} and other prevalent network configure protocols. But they are not perfectly suitable for IoT applications, mainly because the device description language can not define the realtime state of IoT devices. Also, most of this configure protocol can only be used in LAN environment, with limit amount of devices.
 
 \section{Formulation and Measurements}
-EasiSC are implemented on a pull-based IoT search architecture, where any events captured by IoT devices are stored in their semantic descriptions. Crawlers periodically visit a device to copied the description to the server.
+EasiCrawl are implemented on a pull-based IoT search architecture, where any events captured by IoT devices are stored in their semantic descriptions. Crawlers periodically visit a device to copied the description to the server.
 In addition, we setup the follow assumptions to simplify the device model. 
 (1) Events that users care arrived at each IoT device in a Poisson manner, where the time interval between any two event follows exponential distribution. 
 (2) In the sleep mode, devices can be accessed by crawlers, no new events can be captured, which means accessing a sleeping device can only get the event captured by the last working duty cycle. This assumption is actually reasonable for some fifo enabled devices like webcams. 
 (3) User only cares about the event latency, which is the object function for optimization.
 
 
-EasiSC is periodically scheduled with the same strategy, only time period $[0, T]$ need to be discussed.
+EasiCrawl is periodically scheduled with the same strategy, only time period $[0, T]$ need to be discussed.
 Suppose there are totally $N$ devices needs to be re-crawled, while crawler can perform at most $M$ times of crawls during the period $[0, T]$. Our goal is to find a schedule strategy $\phi$, so the latency expectation of all $N$ IoT devices is minimized. 
 For the model simplicity, a discretization method is implied. We set up a discrete time table $\mathbf{T}$, each crawl must preformed at the time point in the time table.
 Crawl schedule $\phi_{i,j}\in\{0,1\}$, and $\phi_{i,j}=1$ means device $i$ will be crawled at time $j$, where time $j\in\mathbf{T}$.
@@ -185,12 +185,12 @@ This value can be deducted by summing up checking the conditional expectations o
 For sleep enabled case, instead of using the complex close form expression to calculate latency expectation, we developed an relaxed measurement, which neglect the exponential part, value of which is close to $0$ when $t$ is relatively large. Fortunately, the latency expectation of a sleep enabled device is convex function of $t$.
 The details of latency measurement are presented in the appendices. 
 
-\section{EasiSC: A Scheduling Strategy for\\IoT Crawlers}
+\section{EasiCrawl: A Scheduling Strategy for\\IoT Crawlers}
 
 We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or none-periodic sleep devices. At last, we discuss the strategy for devices whose sleep plan is previously unknown.
 
 \subsection{Global Solutions}
-EasiSC compute for optimal or near optimal schedule strategy providing different models, given a fixed crawl time.
+EasiCrawl compute for optimal or near optimal schedule strategy providing different models, given a fixed crawl time.
 In previous section, we figure out the relationship between the number of crawls and the expectation of latency $E_L(n)$. 
 Now the object function of formulation \ref{OBJ} can be rewrite as $\sum_{i=1}^{N} \omega_i E_L(n_i)$. The bandwidth constraint can be taken as $\sum_{i=1}^{N} n_i < M$ and the energy constraint of single sensor can be rewrite as $n_i<\gamma_i$.
 
@@ -371,7 +371,7 @@ The authors would like to thank...
 \appendices
 \section{Analysis of Latency Expectation}
 
-\subsection{Without Sleep Mode}
+\subsection{Expectation Without Sleep Mode}
 Although previous work\cite{Cho2000} give out a similar result, we introduce a simpler way for deducing $E_f(t_s, t)$ when device works without sleep. For simplification, suppose the IoT device crawled start working at time $0$. The total freshness latency when crawl at time $t$ can be considered as an random variable $G(t)$, so our goal can be rewritten to compute the expectation $G(t)$, written as $E[G(t)]$. 
 Notice $E[G(t)]$ can be divide into different parts due to the count of events $U_i$ happen during $[0, t)$, then $E[G(t)]$ can be written as:
 \begin{equation}
@@ -383,7 +383,7 @@ $P(N(t)=n)$ is the probability of having $n$ events during $[0,t)$, which follow
 E[G(t)] = (e^{-t\lambda}-1+t \lambda)t \numberthis \label{ExpectCont}
 \end{equation}
 
-\subsection{Latency Expectation With Sleep Mode}
+\subsection{Expectation With Sleep Mode}
 For the sleep situation, device starts to work at time $t_s$, and begin to work with a sleep plan.
 Here we mark $T^{c}_{i}$ as the $i$-th working cycle. $\Delta T^{c}_{i} = T^{w}_{i}+T^{s}_{i}$, where $T^{w}_{i}$ is the $i$-th working cycle and $T^{w}$ is the $i$-th sleeping cycle. 
 It's hard to directly deduce an expectation for a Poisson process whose timeline is break up. However, with equation \eqref{ExpectCont}, we can compute the $E_f(t, t_s)$ by subtract the expectation cause by the previous crawls from $E[G(t)]$. In this recursive way, the expectation can be calculated. Here $E_s[G(t)]$ stands for the expectation to crawl a sleep enabled device at time $t$, $E[G(t)]$ still stands for the expectation if this particular device doesn't sleep.
@@ -413,13 +413,12 @@ E_h[G(t)] = (t-T^{L}(K))^2\lambda + \sum_{i=1}^{K} (2 t - T^{w}_{K-i})T^{w}_{K-i
 
 Function \eqref{ExpectSleepApprox} can be proofed convex using the convexity preserve operations \cite{boyd2004convex}. Provided that $(t-T^{L}(K))^2\lambda$ and $(2 t - T^{w}_{K-i})T^{w}_{K-i}\lambda$ are nonnegative functions, the convexity of function \eqref{ExpectSleepApprox} holds.
 
-\subsection{Latency Expectation in an Arbitrary Period}
+\subsection{Expectation of Arbitrary Period}
 The problem of computing $E_f(t,t_s)$ if $t\ne0$, can be solved given the previous analysis. This problem be divided into two situation according to the value of $t_s$.
 Assume that $t_s\in [0,T^{c}_{1}]$, other case can be transformed to this by shifting $t_s$ and $t$.
 If $t_s$ is in a sleeping cycle, then expectation can just be calculated from the next work cycle.
 Otherwise, if $t_s$ is in a working cycle, the expectation can be estimate by $E_h[G(t)]$ which start at $0$ subtract the latency expectation cause by the events arriving at time $[0, t_s)$.
 % which is $E_f(t,t_s)=E_h[G(t'')]-(E[G(t'')]-E[G(t-t_s)])]$. 
-
 % We define $t'=t-(t_s\bmod\Delta T^{c}_{1})$ and $t''=t-\floor{t_s/\Delta T}\Delta T$ for convenience. 
 
 We define $t'=t-(t_s\bmod\Delta T^{c}_{1})$ and $t''=t-T^{c}_{1}$ for convenience. 

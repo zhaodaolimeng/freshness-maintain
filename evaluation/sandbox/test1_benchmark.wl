@@ -5,6 +5,7 @@ BeginPackage["Benchmark`",{"Easi`"}]
 Only expectation function is implied as a final measurement,
 to check the actually event version, see test_benchmark_discrete
 *)
+
 BestExpectScale::usage="BestExpectScale"
 (*
 TestTotalCrawlNumber::usage="TestTotalCrawlNumber[sensorSettings_,minCrawl_,maxCrawl_]"
@@ -42,7 +43,7 @@ BestExpectScale[
 		Print[ret["opt"]],
 		{sensors,scaleList}];
 	retArr]
-(*
+
 TestTotalCrawlNumber[sensorSettings_,minCrawl_,maxCrawl_]:=Module[{
 	retArr,timeTable,crawl,ret,lList,crawlLimList,
 	sensors,\[Delta],\[Epsilon],maxiter,maxwp,minwp,maxwr,minwr,tr,maxc,minc,maxcs,mincs,maxl,minl},
@@ -71,7 +72,7 @@ TestTotalCrawlNumber[sensorSettings_,minCrawl_,maxCrawl_]:=Module[{
 		retArr[crawl]=ret["opt"];
 	];
 	retArr]
-
+(*
 TestDiscretization[sensorSettings_, minEps_, maxEps_]:=Module[
 	{retArr,ret,eps,lList,crawlLimList,timeTable,
 	sensors,\[Delta],\[Theta],\[Epsilon],maxiter,maxwp,minwp,maxwr,minwr,tr,maxc,minc,maxcs,mincs,maxl,minl},
@@ -122,8 +123,6 @@ TimeTableMaker[sensors_,maxwperiod_,minwperiod_,maxwRange_,minwRange_,timeRange_
 	$tt]
 End[]
 EndPackage[]
-
-
 
 SetDirectory[NotebookDirectory[]];
 
@@ -176,6 +175,7 @@ Module[{
 	Needs["ErrorBarPlots`"];
 	ErrorBarPlots`ErrorListPlot[retTable]
 ]
+
 
 
 (*Crawl Numbers Test*)

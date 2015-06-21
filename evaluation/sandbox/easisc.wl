@@ -187,7 +187,7 @@ $R, {"opt": 1, "trajectory", T*1}, opt is minimal value & trajectory is the sche
 *)
 CrawlUtility[N_,w_]:=Module[
 	{$R,M,f,p,n,m,k,minv=0,temp=0},	
-	M=Dimensions[w][[1]];	
+	M=Dimensions[w][[1]];(*sensors*)
 	$R["opt"]=\[Infinity];$R["trajectory"]={};
 	f=Array[\[Infinity]&,{M,N}];
 	p=Array[0&,{M,N}];

@@ -210,26 +210,28 @@ function [opt] = CrawlPlanning(crawls, dist)
 % crawls, 1, number of crawls allowed for this sensor
 % dist, {value:M*M}, M is the time points available
 
-sensors = size(dist.value,1);
-f = Inf(sensors, crawls);
-p = zeros(sensors, crawls);
-route = zeros(crawls);
-for sensor = 1:sensors
-    f(sensor, 1) = dist.value(sensor,1);
-    p(sensor, 1) = 1;
+% BUGGY!!!!!
+
+nodes = size(dist.value,1);
+f = Inf(nodes, crawls);
+% p = zeros(sensors, crawls);
+% route = zeros(crawls);
+for node = 1:nodes
+    f(node, 1) = dist.value(1,node);
+%     p(sensor, 1) = 1;
 end
 for crawl = 2:crawls
-    for sensor = 2:sensors
-        for mid = 2: sensor - 1
-            tmp = f(mid,crawl-1) + dist.value(mid,sensor);
-            if tmp < f(sensor,crawl)
-                f(sensor,crawl) = tmp;
-                p(sensor,crawl) = mid;
+    for node = 2:nodes
+        for mid = 2: node - 1
+            tmp = f(mid,crawl-1) + dist.value(mid,node);
+            if tmp < f(node,crawl)
+                f(node,crawl) = tmp;
+%                 p(sensor,crawl) = mid;
             end
         end
     end
 end
-opt = f(sensors, crawls);
+opt = f(nodes, crawls);
 % sensor = sensors;
 % for crawl = crawls:-1:1
 %     route(crawl) = sensor;

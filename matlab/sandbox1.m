@@ -53,3 +53,5 @@ for i = 2:length(timeNodeList)
     r =(resultList(i)-resultList(i-1))/(timeNodeList(i)-timeNodeList(i-1));
     disp(['rate =' num2str(r)]);
 end
+
+

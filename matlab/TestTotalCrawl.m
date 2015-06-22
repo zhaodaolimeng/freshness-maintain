@@ -29,7 +29,7 @@ iteratorLimit = 20;
 
 % Total count of crawls
 crawlStep = 1;
-crawlList = 20:50;
+crawlList = 10:50;
 
 resultList = zeros(size(crawlList));
 

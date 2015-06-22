@@ -13,9 +13,9 @@
 % 
 % [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
 
-sensors = 20;
+sensors = 10;
 lambdaList = rand(1,sensors)*0.9+0.1;
-maxcs = 6; mincs = 1; % crawl per each sensor
+maxcs = 10; mincs = 1; % crawl per each sensor
 maxwp = 10; minwp = 3; % count of working cycle 
 maxwr = 10; minwr = 1; % length of working range
 timeRange = 200;
@@ -28,8 +28,8 @@ eps = 10;
 iteratorLimit = 20;
 
 % Total count of crawls
-crawlStep = 10;
-crawlList = 2:5;
+crawlStep = 1;
+crawlList = 20:50;
 
 resultList = zeros(size(crawlList));
 

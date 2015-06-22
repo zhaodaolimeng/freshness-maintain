@@ -117,19 +117,21 @@ for lastCycle=length(timeline):-1:1
         end
         break;
     end
-end
+end    
 if ~done
-    for i = lastCycle:-1:1
-        if stime>=timeline(lastCycle,1)
-            tw = timeline(lastCycle,2) - (stime - timeline(lastCycle,1));
-            expect = expect + lambda*(2*(etime-stime)-tw)*tw;
+    for i = lastCycle - 1:-1:1
+        if stime>=timeline(i,1)
+            tw = timeline(i,2) - (stime - timeline(i,1));
+            expect = expect + lambda*2*((etime-stime)-tw)*tw;
+            expect = expect + lambda*tw^2;
             break;
         end
-        tw = timeline(lastCycle,2);
-        expect = expect + lambda*(2*(etime-stime)-tw)*tw;
+        tw = timeline(i,2);
+        expect = expect + lambda*2*(etime-timeline(i,1)-tw)*tw;
+        expect = expect + lambda*tw^2;
     end
 end
-if expect < 0 ;expect = 0; end
+% if expect < 0 ;expect = 0; end
 end
 
 function [memo, opt, arrange] = ImproveSolution(memo,arrange,dist,crawlLimitList)

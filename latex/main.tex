@@ -78,10 +78,10 @@
 
 \begin{abstract}
 %\boldmath
-The search of IoT(Internet of things) is an important way for people to exploit useful devices. In this paper, we study the problem of crawling the content of low power IoT devices, which is a fundamental step towards building a generic IoT search engine.
-The crawl of IoT devices is very different from that of Web. Many low-power devices may sleep periodically, causing invalid crawls and unreliably latency. Also, in IoT systems, energy consumption of crawl access becomes nonnegligible.
-With these low-power devices widely used in IoT systems, traditional crawling schedule strategy is not suitable.
-In this paper, a new scheduling method, EasiCrawl, is proposed to solve the scheduling problem of crawling periodically sleep IoT devices. The crawling problem with energy limits is formulated as a constraint optimization problem. We use the expectation of latency to measure the realtime performance of crawler scheduling. With this measurement as optimization goal, EasiCrawl can get the near optimal latency expectation, which is more device friendly and suitable for IoT search than traditional web search scheduling.
+The search of IoT(Internet of things) is an important way for people to exploit useful sensors. In this paper, we study the problem of crawling the content of low power IoT sensors, which is a fundamental step towards building a generic IoT search engine.
+The crawl of IoT sensors is very different from that of Web. Many low-power sensors may sleep periodically, causing invalid crawls and unreliably latency. Also, in IoT systems, energy consumption of crawl access becomes nonnegligible.
+With these low-power sensors widely used in IoT systems, traditional crawling schedule strategy is not suitable.
+In this paper, a new scheduling method, EasiCrawl, is proposed to solve the scheduling problem of crawling periodically sleep IoT sensors. The crawling problem with energy limits is formulated as a constraint optimization problem. We use the expectation of latency to measure the realtime performance of crawler scheduling. With this measurement as optimization goal, EasiCrawl can get the near optimal latency expectation, which is more device friendly and suitable for IoT search than traditional web search scheduling.
 At last, EasiCrawl is evaluated with simulations. A case study is also performed with real world data from xively.com.
 % At last, we use simulations to test the expectation of latency of our new scheduling method, which illustrates the effectiveness for repository freshness and lower energy impact on the IoT sensors.
 \end{abstract}
@@ -90,25 +90,25 @@ At last, EasiCrawl is evaluated with simulations. A case study is also performed
 
 \section{Introduction}
 % why IoT search is important
-Searching of IoT(Internet of Things) is a basic step for users and applications to find different kinds of sensors and IoT devices. 
-A generic IoT search engine can be used in variety scenes, which can improve the possibility of sharing sensors and device with others, which can significantly reduce the redundancy of sensor deploying. Also, different applications composition method like IFTTT\cite{ifttt} can be easily implied with the help of IoT search engine.
+Searching of IoT(Internet of Things) is a basic step for users and applications to find different kinds of sensors and IoT sensors. 
+A generic IoT search engine can be used in variety scenes, which can improve the possibility of sharing sensors with others, which can significantly reduce the redundancy of sensor deploying. Also, different applications composition method like IFTTT\cite{ifttt} can be easily implied with the help of IoT search engine.
 More specifically, in smart city applications, public sensors can be found in an ad hoc manner to provide predicates as traffic jam and queuing status. 
-Smart home applications need searchable sensors and devices to detect human activities and provide human-centric sensing, which calls for a realtime sensor discovery mechanism. In recent future, unmanned systems like automatic driving systems and quad-copter delivery systems are likely to be heavily dependent on information gathered from nearby sensors or other IoT devices, which also needs IoT search. In these situations, an overall generic search engine is needed to collect the semantic descriptions of these sensors, and send response to users' queries. 
+Smart home applications need searchable sensors and devices to detect human activities and provide human-centric sensing, which calls for a realtime sensor discovery mechanism. In recent future, unmanned systems like automatic driving systems and quad-copter delivery systems are likely to be heavily dependent on information gathered from nearby sensors or other IoT sensors, which also needs IoT search. In these situations, an overall generic search engine is needed to collect the semantic descriptions of these sensors, and send response to users' queries. 
 
 
 % why our problem is important
-However, the design of IoT search engine is not a trivial problem, even with the help of standardized protocols and semantic descriptions of devices. The main problem lay in the internal instinct of IoT. Firstly, IoT devices is not connected by their content, which is precisely what user cares, link-based crawl method is infeasible for IoT search engine. Secondly, IoT devices, whose content can be highly dynamic, behaves differently from Web page, many of them may enter sleep mode periodically, meanwhile the realtime performance of search is a critical measurement. In this paper, we propose EasiCrawl, which is devoted to solve the sleep-aware IoT crawl problem.
+However, the design of IoT search engine is not a trivial problem, even with the help of standardized protocols and semantic descriptions of sensors. The main problem lay in the internal instinct of IoT. Firstly, IoT sensors is not connected by their content, which is precisely what user cares, link-based crawl method is infeasible for IoT search engine. Secondly, IoT sensors, whose content can be highly dynamic, behaves differently from Web page, many of them may enter sleep mode periodically, meanwhile the realtime performance of search is a critical measurement. In this paper, we propose EasiCrawl, which is devoted to solve the sleep-aware IoT crawl problem.
 
 % practicability
-The built of generic IoT search engine is technically practical. Previous research use semantics\cite{Pfisterer2011} to enhance IoT device description methods. The conception ``description" as an abstraction of the state of a sensor.
+The built of generic IoT search engine is technically practical. Previous research use semantics\cite{Pfisterer2011} to enhance IoT sensor description methods. The conception ``description" as an abstraction of the state of a sensor.
 Descriptions crawled by IoT search engines include not only static contents, but also dynamic contents which are generated by the sensor itself. Indeed, many research group are working on dynamic describing methods, such as CoRE\cite{CoREWorkingGroup2012} from IETF and SensorML\cite{botts2007opengis} from OGC. 
-We are building an IoT search system, which means we treat sensors and devices as Web pages, whom can automatically update their description files that describe their realtime state.
-We suppose every devices in this system supports IP protocol. These devices can generate description file automatically, which may content events detected by these sensors, the most recent updates of data, or simply static meta information about the sensors and their functions. 
-IoT crawlers crawl different sensors and devices for these descriptions files, and copy these into a local copy at server end, called repository. The repository is an organized storage, with whom the user queries about IoT sensors can be accomplished.
+We are building an IoT search system, which means we treat sensors and sensors as Web pages, whom can automatically update their description files that describe their realtime state.
+We suppose every sensors in this system supports IP protocol. These sensors can generate description file automatically, which may content events detected by these sensors, the most recent updates of data, or simply static meta information about the sensors and their functions. 
+IoT crawlers crawl different sensors for these descriptions files, and copy these into a local copy at server end, called repository. The repository is an organized storage, with whom the user queries about IoT sensors can be accomplished.
 The most obvious advantage of using this approach is that we don't need to invent wheels ourself. With maturity technology from information retrieval, there is no need to modify the server side architecture or protocols. There is even no need to modify the hardware of IoT sensors, if a sensor support protocols like CoAP.
 
 
-However, IoT search is different from Web search, mainly because the search targets and higher real-time requirements. We also consider the possible energy constraints and sleep behavior of sensors, where over frequency device access may impact the battery life of IoT devices and result in invalid crawls. Information generated by sensors maybe out of date if the sensors are not crawled at a proper time. So, it's critical to choose crawling frequency and strategies for crawlers. 
+However, IoT search is different from Web search, mainly because the search targets and higher real-time requirements. We also consider the possible energy constraints and sleep behavior of sensors, where over frequency sensor access may impact the battery life of IoT sensors and result in invalid crawls. Information generated by sensors maybe out of date if the sensors are not crawled at a proper time. So, it's critical to choose crawling frequency and strategies for crawlers. 
 In order to choose an appropriate strategy, we hold an assumption that the sensor message that user cares updated in a Poisson manner, and then design an update plan that maximum the expectation of the sum of the messages' freshness, which could be an important compromise between server storage and the aging of stream data generated by massive amount of sensors.
 
 \begin{figure}
@@ -123,8 +123,8 @@ Considering the stability and standardization advantages, in this paper the pull
 We assume the user only interest in the events monitored by corresponded sensors, which arrives periodically or just randomly. With the help of semantic IoT method, IoT sensors capture the event stream, and continuously store these events, and update their description files correspondingly. In this manner, the description file reveal the realtime state of sensors. IoT search engine regularly access the IoT descriptions, then updates the related repository. CoAP with CoRE resource description method can be used as standardized protocol for sensors and devices, and the description messages are listed in the ./well-know file used in the CoRE framework. 
 
 
-EasiCrawl is a scheduling strategy implemented at the server side as a role of IoT Crawl Scheduler. Our design principle is to minimize the information latency during  a period while meet the energy constraint of IoT devices, given sensor sleeping schedule and the frequency of event. Here we clarify that, if a device is sleeping, we indicate that all its communication and event detection function are disabled.
-The insight of the solution lies in the convexity of the function between crawl times and latency for a single device. If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: (1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? (2) What's the best scheduling strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiCrawl is implemented in a iterative way based on these analyze. For each steps, EasiCrawl compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.
+EasiCrawl is a scheduling strategy implemented at the server side as a role of IoT Crawl Scheduler. Our design principle is to minimize the information latency during  a period while meet the energy constraint of IoT sensors, given sensor sleeping schedule and the frequency of event. Here we clarify that, if a sensor is sleeping, we indicate that all its communication and event detection function are disabled.
+The insight of the solution lies in the convexity of the function between crawl times and latency for a single sensor. If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: (1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? (2) What's the best scheduling strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiCrawl is implemented in a iterative way based on these analyze. For each steps, EasiCrawl compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.
 Our paper is organized as follows. We formalize the optimization problem in section II, then introduce EasiCrawl in section III. Simulations and a case study are preformed in section IV. 
 
 This paper has three contributions.
@@ -134,35 +134,35 @@ This paper has three contributions.
 
 \section{Related Work}
 
-Crawlers Scheduling is a well studied topic in the field of Web search. Previous works\cite{Cho2000}\cite{Wolf2002}\cite{Challenger2004} analyzed how the crawler strategy affect the freshness of the repository of web pages maintained by web crawlers, which determines the query hit rate and whether this system can return a up-to-date result. However, In a IoT search system, the realtime requirements can be more strict while some inherent properties of IoT like the sleep of IoT devices and resource constraints, make IoT crawler's strategy very different from crawlers in a traditional Web search engine. 
+Crawlers Scheduling is a well studied topic in the field of Web search. Previous works\cite{Cho2000}\cite{Wolf2002}\cite{Challenger2004} analyzed how the crawler strategy affect the freshness of the repository of web pages maintained by web crawlers, which determines the query hit rate and whether this system can return a up-to-date result. However, In a IoT search system, the realtime requirements can be more strict while some inherent properties of IoT like the sleep of IoT sensors and resource constraints, make IoT crawler's strategy very different from crawlers in a traditional Web search engine. 
 
 
 The schedule strategy has intimate connections with IoT search architectures.
 Many different architectures of IoT search have been proposed, which can mainly be divided into two different architectures, push-based or pull-based.
-In a push-based system, the realtime performance is a prior. Sensor data are periodically sent and stored in servers, and search request are actually running on continuous datastreams. Many practical applications collect data from sensors, and perform query directly in databases using SQL. Technologies like TinyDB\cite{TinyDB} and IoT feeds\cite{Whitehouse2006} take IoT devices as datasources, and process structured command to query the data stream generated by these devices. This kind of IoT architecture are easy to implement, but can be clumsy sometime. In many applications, not all data is need to be sent and uploaded to server, and this problem seems inevitable because it's almost impossible for sensors and devices to know exactly what the user want.
+In a push-based system, the realtime performance is a prior. Sensor data are periodically sent and stored in servers, and search request are actually running on continuous datastreams. Many practical applications collect data from sensors, and perform query directly in databases using SQL. Technologies like TinyDB\cite{TinyDB} and IoT feeds\cite{Whitehouse2006} take IoT sensors as datasources, and process structured command to query the data stream generated by these sensors. This kind of IoT architecture are easy to implement, but can be clumsy sometime. In many applications, not all data is need to be sent and uploaded to server, and this problem seems inevitable because it's almost impossible for sensors to know exactly what the user want.
 On the other side may be the solution to the requirement match problem.
-Pull-based architecture use semantic description, i.e. XML, to describe IoT sensors and devices. Devices update their description based on data collected, which make the behavior of whom very similar to a web page. This property makes search IoT with a traditional Web search engine possible. For example, Dyser\cite{Dyser} use crawlers and modern indexing methods, along with semantic IoT technology as IoT device descriptions. Previous works of semantic IoT\cite{Compton2012} and the propose of CoRE\cite{CoREWorkingGroup2012} devoted to standardize IoT device description languages, which indicated the possibility of building a web-style IoT search system. Although the communication over-head of pull-based architecture is relatively heavy, and when lacking of prior information, most crawlers schedule methods are actually myopic, the scalability make pull-based IoT search architecture very promising.
+Pull-based architecture use semantic description, i.e. XML, to describe IoT sensors. Devices update their description based on data collected, which make the behavior of whom very similar to a web page. This property makes search IoT with a traditional Web search engine possible. For example, Dyser\cite{Dyser} use crawlers and modern indexing methods, along with semantic IoT technology as IoT sensor descriptions. Previous works of semantic IoT\cite{Compton2012} and the propose of CoRE\cite{CoREWorkingGroup2012} devoted to standardize IoT sensor description languages, which indicated the possibility of building a web-style IoT search system. Although the communication over-head of pull-based architecture is relatively heavy, and when lacking of prior information, most crawlers schedule methods are actually myopic, the scalability make pull-based IoT search architecture very promising.
 
 
-We also look into technologies used in LAN to automate home devices, which may also be used in IoT applications. For example, UPnP\cite{UPnP}, Bonjour\cite{Bonjour} and other prevalent network configure protocols. But they are not perfectly suitable for IoT applications, mainly because the device description language can not define the realtime state of IoT devices. Also, most of this configure protocol can only be used in LAN environment, with limit amount of devices.
+We also look into technologies used in LAN to automate home devices, which may also be used in IoT applications. For example, UPnP\cite{UPnP}, Bonjour\cite{Bonjour} and other prevalent network configure protocols. But they are not perfectly suitable for IoT applications, mainly because the device description language can not define the realtime state of IoT sensors. Also, most of this configure protocol can only be used in LAN environment, with limit amount of devices.
 
 \section{Formulation and Measurements}
-EasiCrawl are implemented on a pull-based IoT search architecture, where any events captured by IoT devices are stored in their semantic descriptions. Crawlers periodically visit a device to copied the description to the server.
-In addition, we setup the follow assumptions to simplify the device model. 
-(1) Events that users care arrived at each IoT device in a Poisson manner, where the time interval between any two event follows exponential distribution. 
-(2) In the sleep mode, devices can be accessed by crawlers, no new events can be captured, which means accessing a sleeping device can only get the event captured by the last working duty cycle. This assumption is actually reasonable for some fifo enabled devices like webcams. 
+EasiCrawl are implemented on a pull-based IoT search architecture, where any events captured by IoT sensors are stored in their semantic descriptions. Crawlers periodically visit a sensor to copied the description to the server.
+In addition, we setup the follow assumptions to simplify sensor's working model. 
+(1) Events that users care arrived at each IoT sensor in a Poisson manner, where the time interval between any two event follows exponential distribution. 
+(2) In the sleep mode, sensors can be accessed by crawlers, no new events can be captured, which means accessing a sleeping sensor can only get the event captured by the last working duty cycle. This assumption is actually reasonable for some fifo enabled sensors like webcams. 
 (3) User only cares about the event latency, which is the object function for optimization.
 
 
 EasiCrawl is periodically scheduled with the same strategy, only time period $[0, T]$ need to be discussed.
-Suppose there are totally $N$ devices needs to be re-crawled, while crawler can perform at most $M$ times of crawls during the period $[0, T]$. Our goal is to find a schedule strategy $\phi$, so the latency expectation of all $N$ IoT devices is minimized. 
+Suppose there are totally $N$ sensors needs to be re-crawled, while crawler can perform at most $M$ times of crawls during the period $[0, T]$. Our goal is to find a schedule strategy $\phi$, so the latency expectation of all $N$ IoT sensors is minimized. 
 For the model simplicity, a discretization method is implied. We set up a discrete time table $\mathbf{T}$, each crawl must preformed at the time point in the time table.
-Crawl schedule $\phi_{i,j}\in\{0,1\}$, and $\phi_{i,j}=1$ means device $i$ will be crawled at time $j$, where time $j\in\mathbf{T}$.
-The total access count of all $N$ devices during $[0, T]$ can be represented as $\Arrowvert\phi\Arrowvert_{1}$. For each device $i$, the total crawl time is marked as $\sum_{i=1}^{N}\phi_{i,k}$. 
-Considering the difference between sensors, we define $\omega_i$ as the expectation weight of sensor $i$. The latency expectation, which is the final object function, can be evaluated as $\Arrowvert \omega_i E(\phi) \Arrowvert_{1}$, where $\omega_i$ is the weight parameter for the latency of device $i$.
+Crawl schedule $\phi_{i,j}\in\{0,1\}$, and $\phi_{i,j}=1$ means sensor $i$ will be crawled at time $j$, where time $j\in\mathbf{T}$.
+The total access count of all $N$ sensors during $[0, T]$ can be represented as $\Arrowvert\phi\Arrowvert_{1}$. For each sensor $i$, the total crawl time is marked as $\sum_{i=1}^{N}\phi_{i,k}$. 
+Considering the difference between sensors, we define $\omega_i$ as the expectation weight of sensor $i$. The latency expectation, which is the final object function, can be evaluated as $\Arrowvert \omega_i E(\phi) \Arrowvert_{1}$, where $\omega_i$ is the weight parameter for the latency of sensor $i$.
 
-In addition, this problem must follow several constraints. Server load and IoT devices' energy consumption are two main limitations to consider as discussed above. 
-The energy constraint of the sensor can be formalized directly: any IoT devices cannot be accessed too frequently, which means any period $[0, T]$, the access time $C_i$ for sensor $i$ is limited to be accessed less than $\gamma_i$ times. For the server load, our settings are similar to the formal research\cite{Wolf2002}, where the crawlers from the server can not commit more that $\theta$ crawls during time period$[0, T]$.
+In addition, this problem must follow several constraints. Server load and IoT sensors' energy consumption are two main limitations to consider as discussed above. 
+The energy constraint of the sensor can be formalized directly: any IoT sensor cannot be accessed too frequently, which means any period $[0, T]$, the access time $C_i$ for sensor $i$ is limited to be accessed less than $\gamma_i$ times. For the server load, our settings are similar to the formal research\cite{Wolf2002}, where the crawlers from the server can not commit more that $\theta$ crawls during time period$[0, T]$.
 With the object function and constraints, we get the following optimization problem:
 \begin{eqnarray}
 \begin{array}{ll}
@@ -174,20 +174,20 @@ With the object function and constraints, we get the following optimization prob
 \end{array}\label{OBJ}
 \end{eqnarray}
 
-Problem \eqref{OBJ} is a generalized formulation, which does not content specific device model and sleep behavior of IoT devices. Due to different requirements between IoT applications, it's not rational to use an universal model to formalize the sleep pattern. For many devices, the sleep pattern is unknown, while others may have been per-arranged.  In the follow section, different working model of device is discussed. 
+Problem \eqref{OBJ} is a generalized formulation, which does not content specific sensor model and sleep behavior of IoT sensors. Due to different requirements between IoT applications, it's not rational to use an universal model to formalize the sleep pattern. For many sensors, the sleep pattern is unknown, while others may have been per-arranged.  In the follow section, different working model of sensor is discussed. 
 
-The latency talked in this paper is defined as the expectation of the duration from when the events are captured by devices to the time when crawler copy these events to the server side repository. In other words, the latency is opposite to the freshness of all the events user get from the repository.
+The latency talked in this paper is defined as the expectation of the duration from when the events are captured by sensors to the time when crawler copy these events to the server side repository. In other words, the latency is opposite to the freshness of all the events user get from the repository.
 In this paper, we mainly study the measurements of latency expectation when the sleep pattern is previously known.
-To measure the latency expectation at a certain time $t$, we define $E_f(t, t_s)$ as the expectation when crawler crawls the IoT device at time $t$, and $t_s$ is the last time this device is crawled. In addition, we use the annotation $G(t)$ as latency expectation for crawling at time $t$.
+To measure the latency expectation at a certain time $t$, we define $E_f(t, t_s)$ as the expectation when crawler crawls the IoT sensor at time $t$, and $t_s$ is the last time this sensor is crawled. In addition, we use the annotation $G(t)$ as latency expectation for crawling at time $t$.
 
-Computing latency expectation of a continuously working device is a well-studied problem\cite{Cho2000, Wolf2002}. 
+Computing latency expectation of a continuously working sensor is a well-studied problem\cite{Cho2000, Wolf2002}. 
 This value can be deducted by summing up checking the conditional expectations of different number of events happened during the work time. 
-For sleep enabled case, instead of using the complex close form expression to calculate latency expectation, we developed an relaxed measurement, which neglect the exponential part, value of which is close to $0$ when $t$ is relatively large. Fortunately, the latency expectation of a sleep enabled device is convex function of $t$.
+For sleep enabled case, instead of using the complex close form expression to calculate latency expectation, we developed an relaxed measurement, which neglect the exponential part, value of which is close to $0$ when $t$ is relatively large. Fortunately, the latency expectation of a sleep enabled sensor is convex function of $t$.
 The details of latency measurement are presented in the appendices. 
 
 \section{EasiCrawl: A Scheduling Strategy for\\IoT Crawlers}
 
-We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or none-periodic sleep devices. At last, we discuss the strategy for devices whose sleep plan is previously unknown.
+We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or none-periodic sleep sensors. At last, we discuss the strategy for sensors whose sleep plan is previously unknown.
 
 \subsection{Global Solutions}
 EasiCrawl compute for optimal or near optimal schedule strategy providing different models, given a fixed crawl time.
@@ -201,9 +201,9 @@ First we dispatch the $M$ crawl time to $N$ sensors according to $\omega_i$. The
 
 \subsection{Periodic Sleep Devices}
 
-Next, we introduce the crawling strategy for single device under different situations.
+Next, we introduce the crawling strategy for single sensor under different situations.
 We first focused on the scheduling of arranged sleep pattern, which are more likely to bring potential freshness gain through fixed amount of crawl actions.
-In the situation when IoT devices continuously work, an intuition is to evenly distributed the crawling action across the crawling schedule. Here a proof of this proposition is given.
+In the situation when IoT sensors continuously work, an intuition is to evenly distributed the crawling action across the crawling schedule. Here a proof of this proposition is given.
 
 \begin{lemma}
 \label{evenly}
@@ -330,21 +330,34 @@ $f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v
 \end{algorithm}
 
 \subsection{If Sleep Pattern is Unknown}
-To our best knowledge, for the unknown sleep pattern case, if there are latent pattern for the sleep behavior, the detection and scheduling can be formed as an multi-armed bandit problem, which is know NP-hard. If there are no latent pattern for sleep behavior, then there will be not optimal strategy expect for periodically device querying, which is definitely an inefficiency schedule method. 
+To our best knowledge, for the unknown sleep pattern case, if there are no previous knowledge for the sleep behavior, the detection and scheduling can be formed as an multi-armed bandit problem, which is know NP-hard. If there are no latent pattern for sleep behavior, then there will be not optimal strategy expect for periodically sensor querying, which is definitely an inefficiency schedule method. 
 
 
 \section{Simulation and Evaluation}
 
+In the evaluation section, we want to test the performance of EasiCrawl under different parameters, and confirm the effectiveness with real events sequence.
+We carry out a benchmark of EasiCrawl to test the latency expectation with different input parameters. Then a comparison is made between EasiCrawl and a greedy method. All these simulation are done one a PC with MATLAB.
 
-\subsection{Measurement}
+\subsection{Benchmark}
 
-\subsection{Parameters}
 
-\subsection{Compare with Random Scheduling}
+
+\subsection{Comparison}
+
+
+\section{Case Study With Xively.com}
+
+Xively is a platform which integrates IoT sensors. With hundreds of available sensors around the world ,which can simply access with http, xively become a ideal platform for our crawl method. 
+We use airqualityegg\cite{airegg} sensors located in London and radiation sensors in Tokyo as candidates. 
+
+
+In a strict sense, what we mean by accessing the sensors is actually accomplished by query the Xively database which hold the up-to-date sensor information, however this makes no different for us than directly accessing a real sensor. Another problem is that most raw sensors on xively don't support semantic senor description functions. So we add a layer, which translate raw data streams to event descriptions. A sudden raise in temperature or violation of radiation limit are taken as events, and will be stored as a description, which is the target to be crawled.
+
 
 
 \section{Conclusion}
 
+The pull-based and push-based analysis is the guidance.
 
 \section*{Acknowledgment}
 
@@ -372,7 +385,7 @@ The authors would like to thank...
 \section{Analysis of Latency Expectation}
 
 \subsection{Expectation Without Sleep Mode}
-Although previous work\cite{Cho2000} give out a similar result, we introduce a simpler way for deducing $E_f(t_s, t)$ when device works without sleep. For simplification, suppose the IoT device crawled start working at time $0$. The total freshness latency when crawl at time $t$ can be considered as an random variable $G(t)$, so our goal can be rewritten to compute the expectation $G(t)$, written as $E[G(t)]$. 
+Although previous work\cite{Cho2000} give out a similar result, we introduce a simpler way for deducing $E_f(t_s, t)$ when sensor works without sleep. For simplification, suppose the IoT sensor crawled start working at time $0$. The total freshness latency when crawl at time $t$ can be considered as an random variable $G(t)$, so our goal can be rewritten to compute the expectation $G(t)$, written as $E[G(t)]$. 
 Notice $E[G(t)]$ can be divide into different parts due to the count of events $U_i$ happen during $[0, t)$, then $E[G(t)]$ can be written as:
 \begin{equation}
 E[G(t)] = \sum_{n=1}^{\infty} E[G(t)|N(t)=n]P(N(t)=n) \label{EG}
@@ -384,9 +397,9 @@ E[G(t)] = (e^{-t\lambda}-1+t \lambda)t \numberthis \label{ExpectCont}
 \end{equation}
 
 \subsection{Expectation With Sleep Mode}
-For the sleep situation, device starts to work at time $t_s$, and begin to work with a sleep plan.
+For the sleep situation, sensor starts to work at time $t_s$, and begin to work with a sleep plan.
 Here we mark $T^{c}_{i}$ as the $i$-th working cycle. $\Delta T^{c}_{i} = T^{w}_{i}+T^{s}_{i}$, where $T^{w}_{i}$ is the $i$-th working cycle and $T^{w}$ is the $i$-th sleeping cycle. 
-It's hard to directly deduce an expectation for a Poisson process whose timeline is break up. However, with equation \eqref{ExpectCont}, we can compute the $E_f(t, t_s)$ by subtract the expectation cause by the previous crawls from $E[G(t)]$. In this recursive way, the expectation can be calculated. Here $E_s[G(t)]$ stands for the expectation to crawl a sleep enabled device at time $t$, $E[G(t)]$ still stands for the expectation if this particular device doesn't sleep.
+It's hard to directly deduce an expectation for a Poisson process whose timeline is break up. However, with equation \eqref{ExpectCont}, we can compute the $E_f(t, t_s)$ by subtract the expectation cause by the previous crawls from $E[G(t)]$. In this recursive way, the expectation can be calculated. Here $E_s[G(t)]$ stands for the expectation to crawl a sleep enabled sensor at time $t$, $E[G(t)]$ still stands for the expectation if this particular sensor doesn't sleep.
 Start time $t_s=0$, $E_f(t_s,t)$ can be written as $E_s[G(t)]$.Suppose time $t$ locates in an working period, written as $t \in [t_s + \sum_{i=1}^{k} T^{c}_{i}, t_s + \sum_{i=1}^{k} T^{c}_{i} + T^{w}_{i}]$, where $k\in\mathbb{N}$. This assumption is based on the fact that, any crawl at a sleeping cycle can be bring forward to last work cycle for a better latency expectation.
 \begin{align*}
 E_h[G(t)] & = E[G(t-T^{L}(K))] + \\
@@ -395,14 +408,14 @@ E_h[G(t)] & = E[G(t-T^{L}(K))] + \\
 \end{align*}
 
 Here $T^{L}(K) = \sum_{j=1}^{K} T^{c}_{j}$, which is time duration of first $K$ cycles, and $K$ is the count of cycle $T^{C}$. 
-For any time $t$ in a sensor working cycle, by summing those expectations before $t$, the overall expectation of latency can be achieved when take device sleep cycle into consideration. The first factor of \eqref{ExpectSleep} is the expectation of last working cycle, and the sum is the expectation of the previous working cycle.
+For any time $t$ in a sensor working cycle, by summing those expectations before $t$, the overall expectation of latency can be achieved when take sensor sleep cycle into consideration. The first factor of \eqref{ExpectSleep} is the expectation of last working cycle, and the sum is the expectation of the previous working cycle.
 
 
 Expression \eqref{ExpectSleep} is too complex for practical use, so we figure out a way to simplify this. 
 We assume $t\lambda$ is relatively large, which means in a work cycle multiply events are trends to be captured.
 Notice that if $t\rightarrow \infty$, $e^{-t\lambda}-1+t \lambda \rightarrow 0$, which means expectation \eqref{ExpectCont} can be approximated by a quadratic expression $t^2\lambda$.
 With this observation, the expectation gain of a previous work cycle can be approximated using $E[G(t)]-E[G(t-\delta)] = \delta (2 t - \delta)\lambda$, which is a linear function of $t$. Here $\delta$ is the length of working cycle.
-This indicates that latency expectation of a sleep enabled device can actually be approximated by a piecewise linear function.
+This indicates that latency expectation of a sleep enabled sensor can actually be approximated by a piecewise linear function.
 According to equation \eqref{ExpectSleep}, each segment of the approximate function is the sum of different non-decrease linear expressions.
 By taking approximation of $E[G(t)]-E[G(t-\delta)]$ into \eqref{ExpectSleep}, an approximation of $E_h[G(t)]$ is achieved as the follows.
 \begin{align*}

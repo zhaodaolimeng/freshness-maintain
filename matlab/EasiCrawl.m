@@ -1,4 +1,4 @@
-function [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit)
+function [opt,arrange,rate] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit)
 %%
 % Compute best schedule given timetable and event density predication
 % --
@@ -26,14 +26,20 @@ arrange = EvenlyDivide(crawlLimitList,sumOfCrawl);
 for i=1:sensors
     memo(i).value=zeros(1,crawlLimitList(i))-1;
 end
+optFirst = 0;
+optLast = 0;
 for i=1:iteratorLimit
     oldopt = opt;
-    [memo, opt,arrange] = ImproveSolution(memo,arrange,distanceMatrix,crawlLimitList);
+    [memo, opt,arrange] = ImproveSolution(memo,arrange,distanceMatrix,crawlLimitList);    
     disp(['opt = ' num2str(opt) ' arrange = ' mat2str(arrange)]);
+    if i == 1 ;optFirst = opt; end
+    if i == iteratorLimit ;optLast = opt; end
     if abs(opt-oldopt)<eps
+        optLast = opt;
         break;
     end
 end
+rate = (optFirst - optLast)/optFirst;
 end
 
 function [arr] =  EvenlyDivide(crawlLimitList,sumOfCrawls)
@@ -80,9 +86,10 @@ for sensor = 1:sensors
     timeNode = [];
     for i =1:length(timeline(:,1))
         workCycle = timeline(i,:);
-        timeNode = horzcat(timeNode, workCycle(2)+workCycle(1):-discreteStep:workCycle(1));        
+        timeNode = horzcat(timeNode, workCycle(2)+workCycle(1):-discreteStep:workCycle(1));
     end
     timeNode = sort(timeNode);
+    if timeNode(1) ~= 0;timeNode = horzcat(0, timeNode);end        
     nodeCnt = length(timeNode);
     distanceMap = zeros(nodeCnt);
     for i=1:nodeCnt
@@ -117,7 +124,7 @@ for lastCycle=length(timeline):-1:1
         end
         break;
     end
-end    
+end
 if ~done
     for i = lastCycle - 1:-1:1
         if stime>=timeline(i,1)

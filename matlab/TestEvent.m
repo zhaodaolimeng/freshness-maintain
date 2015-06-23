@@ -1,5 +1,4 @@
-% Test the impact of discretization step length, with the same timetable
-% Error bar needed
+% Benckmark of EasiCrawl with real events instead of LatencyExpectation
 
 sensors = 10;
 lambdaList = rand(1,sensors)*0.9+0.1;
@@ -13,17 +12,13 @@ eps = 10;
 iteratorLimit = 20;
 sumOfCrawl = 100;
 
+% Generate Event
+
+
+
+
 discreteStep = 2;
 [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
 
 % Total count of crawls
-discreteStepList = 1:10;
-resultList = zeros(size(discreteStepList));
-rateList = zeros(size(discreteStepList));
-for discreteStep = discreteStepList     
-    [opt,arrange,rate] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
-    resultList(discreteStep) = opt;
-    rateList(discreteStep) = rate;
-end
-plot(resultList);
-%plot(rateList);
+

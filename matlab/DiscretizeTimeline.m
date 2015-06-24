@@ -17,9 +17,10 @@ for sensor = 1:sensors
     for i =1:length(timeline(:,1))
         workCycle = timeline(i,:);
         timeNode = horzcat(timeNode, workCycle(2)+workCycle(1):-discreteStep:workCycle(1));
+        % The last time point of work cycle will always be included
     end
     timeNode = sort(timeNode);
-    if timeNode(1) ~= 0;timeNode = horzcat(0, timeNode);end        
+    if timeNode(1) ~= 0;timeNode = horzcat(0, timeNode);end
     nodeCnt = length(timeNode);
     distanceMap = zeros(nodeCnt);
     for i=1:nodeCnt
@@ -29,6 +30,7 @@ for sensor = 1:sensors
     end
     dist(sensor).value = distanceMap;
     dist(sensor).timeNode = timeNode;
+    dist(sensor).timeline = timeline; % Needed by greedy crawl method
 end
 end
 

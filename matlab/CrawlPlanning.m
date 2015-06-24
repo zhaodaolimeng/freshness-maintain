@@ -1,9 +1,29 @@
-function [opt,route] = CrawlPlanning(crawls, dist)
+function [opt,route] = CrawlPlanning(crawls,dist,sensorType)
 %%
-% DP method for calculate the best value for single sensor
+% Method for calculate the best crawling plan for single sensor
 % ---
 % crawls, 1, number of crawls allowed for this sensor
-% dist, {value:M*M}, M is the time points available
+% dist, {value:M*M,timeNode:K_i}, M is the time points available
+% sensorType, 1, 1==DP & 2==Greedy & 3==Evenly
+
+switch nargin
+    case 2
+        disp('WARNING: sensorType is unset');
+        sensorType = 1;
+end
+switch sensorType
+    case 1
+        [opt,route] = dp(crawls,dist);
+    case 2
+        [opt,route] = greedy(crawls,dist);
+    case 3
+        [opt,route] = evenly(crawls,dist);
+end
+end
+
+function [opt,route] = dp(crawls,dist)
+%% 
+% DP method for crawls planning
 
 nodes = size(dist.value,1);
 f = Inf(nodes, crawls);
@@ -21,7 +41,7 @@ for crawl = 2:crawls
                 f(node,crawl) = tmp;
                 p(node,crawl) = mid;
             end
-        end
+        end % Built on relationship between sub-problems
     end
 end
 opt = f(nodes, crawls);
@@ -31,4 +51,112 @@ for crawl = crawls:-1:1
     if prenode == 0 ;break;end
     prenode = p(prenode, crawl);
 end
+end
+
+function [opt,route] = greedy(crawls,dist)
+%%
+% Greedy method for periodic sleep sensors
+% Buggy due to lack of value validation
+
+timeline = dist.timeline;
+timeNode = dist.timeNode;
+distance = dist.value;
+cycle = size(timeline,1);
+
+countList = zeros(1,cycle);
+if crawls <= cycle
+    army =  floor(cycle/crawls);
+    outlaw = mod(cycle/crawls);     
+    jack = outlaw;
+    % A good name makes coder stupid
+    for flag = cycle:-army:outlaw
+        countList(flag) = 1;        
+        if jack > 0
+            countList(floor(flag+army/2)) = 1;
+            jack = jack - 1;
+        end
+    end
+    route = [];
+    flag = 1; 
+    % Go over countList, put index of timeNode into route    
+    for index = 1:length(timeNode)
+        node = timeNode(index);
+        while true
+            if countList(flag) == 1                
+                break;                            
+            end
+            flag = flag + 1;
+        end % flag to a end of cycle
+        endTime = timeline(flag,1) + timeline(flag,2);
+        if node == endTime
+            route = [route index];
+        end
+    end
+else
+    crawlPercycle = floor(crawls/cycle);
+    outlaw = mod(crawls, cycle);    
+    jack = outlaw;
+    route = [];    
+    for i = cycle:-1:1
+        crawlCnt = crawlPercycle;
+        if jack>0
+            crawlCnt = crawlCnt + 1;
+            jack = jack - 1;
+        end
+        % Choose the best timeNode in each work cycle
+        index = length(timeNode);        
+        endOfCycle = timeline(i,1)+timeline(i,2);
+        while timeNode(index) ~= endOfCycle
+            index = index - 1;
+        end % move index to the tail of a cycle
+        route = [index route];
+        crawlCnt = crawlCnt - 1;
+        if crawlCnt == 0 ;continue; end        
+        
+        startOfNextCycle = index; % Find start of cycle
+        while timeNode(startOfNextCycle) < timeline(i,1)
+            startOfNextCycle = startOfNextCycle - 1;
+        end
+        workNodeCnt = index - startOfNextCycle; % nodes in work cycle
+        nodesPerCrawl = workNodeCnt/crawlCnt;
+        remain = mod(timeline(i,2),crawlCnt);            
+        for t = index-nodesPerCrawl:-nodesPerCrawl:startOfNextCycle
+            if remain > 0
+                route = [(t+floor(nodesPerCrawl/2)) route];
+            end
+            route = [t route];            
+        end        
+    end
+end
+
+lastCheckpoint = 1;
+for checkpoint = route
+    opt = opt + distance(lastCheckpoint, checkpoint);
+    lastCheckpoint = checkpoint;
+end
+end
+
+
+function [opt,route] = evenly(crawls,dist)
+%%
+% When sensor's sleeping plan is unknown, nothing except for evenly crawl
+
+timeNode = dist.timeNode;
+distance = dist.value;
+
+nodesPerCrawl = floor(length(timeNode)/crawls);
+remain = mod(length(timeNode),crawls);
+
+for flag = length(timeNode):-nodesPerCrawl:length(timeNode)-remain
+    if remain > 0
+        route = [(flag - floor(nodesPerCrawl/2)) route];
+    end
+    route = [flag route];
+end
+lastCheckpoint = 1;
+for checkpoint = route
+    opt = opt + distance(lastCheckpoint, checkpoint);
+    lastCheckpoint = checkpoint;
+end
+
 end

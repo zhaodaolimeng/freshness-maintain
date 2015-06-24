@@ -5,6 +5,8 @@ sumOfCrawl = randi([25,30]);
 discreteStep = 2;
 eps = 10;
 iteratorLimit = 20;
+sensorWeight = ones(1,sensors);
+sensorType = ones(1,sensors);
 
 % Build time table
 maxwp = 10;
@@ -15,5 +17,5 @@ timeRange=200;
 timeTable = MakeTimeTable(sensors,maxwp,minwp,maxwr,minwr,timeRange);
 
 [opt] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
-[opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
+[opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit,sensorWeight,sensorType);
 

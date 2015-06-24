@@ -1,3 +1,5 @@
+% Debug file for CrawlPlanning method
+
 timeline = [98,9;107,7;141,1;157,1;162,6];
 timeNodeList = [99,101,103,105,107,108,110,112,114,142,158,162,164,166,168];
 lambda = 0.8057;

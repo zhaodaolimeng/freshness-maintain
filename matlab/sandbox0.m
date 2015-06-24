@@ -14,4 +14,6 @@ minwr=1;
 timeRange=200;
 timeTable = MakeTimeTable(sensors,maxwp,minwp,maxwr,minwr,timeRange);
 
+[opt] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
 [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
+

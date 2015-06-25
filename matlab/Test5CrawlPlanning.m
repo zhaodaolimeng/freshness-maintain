@@ -1,4 +1,4 @@
-% Check whether crawl planning works, must be optimal
+% Real discrete event sequence test for different crawl planning method
 
 sensors = 10;
 lambdaList = rand(1,sensors)*0.9+0.1;

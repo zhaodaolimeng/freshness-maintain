@@ -29,7 +29,7 @@ optFirst = 0;
 optLast = 0;
 for i=1:iteratorLimit
     oldopt = opt;
-    [memo, opt, arrange] = ImproveSolution(memo,arrange,distanceMatrix,crawlLimitList,sensorWeight,sensorType);    
+    [memo,opt,arrange] = ImproveSolution(memo,arrange,distanceMatrix,crawlLimitList,sensorWeight,sensorType);    
     disp(['opt = ' num2str(opt) ' arrange = ' mat2str(arrange)]);
     if i == 1 ;optFirst = opt; end
     if i == iteratorLimit ;optLast = opt; end

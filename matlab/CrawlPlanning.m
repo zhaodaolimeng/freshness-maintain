@@ -65,15 +65,15 @@ cycle = size(timeline,1);
 
 countList = zeros(1,cycle);
 if crawls <= cycle
-    army =  floor(cycle/crawls);
-    outlaw = mod(cycle/crawls);     
-    jack = outlaw;
-    % A good name makes coder stupid
-    for flag = cycle:-army:outlaw
-        countList(flag) = 1;        
-        if jack > 0
-            countList(floor(flag+army/2)) = 1;
-            jack = jack - 1;
+    cyclePerCrawl =  floor(cycle/crawls);
+    remain = mod(cycle,crawls);     
+    r = remain;
+    for flag = cycle:-cyclePerCrawl:remain + cyclePerCrawl
+        if flag == 0 ;break; end
+        countList(flag) = 1;
+        if r > 0
+            countList(floor(flag+cyclePerCrawl/2)) = 1;
+            r = r - 1;
         end
     end
     route = [];
@@ -90,18 +90,19 @@ if crawls <= cycle
         endTime = timeline(flag,1) + timeline(flag,2);
         if node == endTime
             route = [route index];
+            flag = flag + 1;
         end
     end
 else
     crawlPercycle = floor(crawls/cycle);
     outlaw = mod(crawls, cycle);    
-    jack = outlaw;
+    r = outlaw;
     route = [];    
     for i = cycle:-1:1
         crawlCnt = crawlPercycle;
-        if jack>0
+        if r>0
             crawlCnt = crawlCnt + 1;
-            jack = jack - 1;
+            r = r - 1;
         end
         % Choose the best timeNode in each work cycle
         index = length(timeNode);        
@@ -123,13 +124,15 @@ else
         for t = index-nodesPerCrawl:-nodesPerCrawl:startOfNextCycle
             if remain > 0
                 route = [(t+floor(nodesPerCrawl/2)) route];
+                remain = remain - 1;
             end
             route = [t route];            
-        end        
+        end
     end
 end
 
 lastCheckpoint = 1;
+opt = 0;
 for checkpoint = route
     opt = opt + distance(lastCheckpoint, checkpoint);
     lastCheckpoint = checkpoint;
@@ -147,7 +150,7 @@ distance = dist.value;
 nodesPerCrawl = floor(length(timeNode)/crawls);
 remain = mod(length(timeNode),crawls);
 
-for flag = length(timeNode):-nodesPerCrawl:length(timeNode)-remain
+for flag = length(timeNode):-nodesPerCrawl:remain
     if remain > 0
         route = [(flag - floor(nodesPerCrawl/2)) route];
     end

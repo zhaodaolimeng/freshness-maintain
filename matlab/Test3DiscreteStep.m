@@ -1,5 +1,8 @@
 % Test the impact of discretization step length, with the same timetable
 % Error bar needed
+% Computation cost should be evaluated
+
+clear;clc % Caution
 
 sensors = 10;
 lambdaList = rand(1,sensors)*0.9+0.1;
@@ -13,17 +16,23 @@ eps = 10;
 iteratorLimit = 20;
 sumOfCrawl = 100;
 
-discreteStep = 2;
-[opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
+sensorWeight = ones(1,sensors);
+sensorType = ones(1,sensors);
 
 % Total count of crawls
-discreteStepList = 1:10;
+discreteStepList = 1:20;
 resultList = zeros(size(discreteStepList));
-rateList = zeros(size(discreteStepList));
+durationList = zeros(size(discreteStepList));
+resultRList = zeros(size(discreteStepList));
 for discreteStep = discreteStepList     
-    [opt,arrange,rate] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
+    startTime = cputime;
+    [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit,sensorWeight,sensorType);
+    duration = cputime - startTime;
+    durationList(discreteStep) = duration;
     resultList(discreteStep) = opt;
-    rateList(discreteStep) = rate;
+    [opt,arrange] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
+    resultRList(discreteStep) = opt;    
 end
-plot(resultList);
-%plot(rateList);
+
+plot([resultList;resultRList]');
+save('Test3.mat','resultList','resultRList','durationList');

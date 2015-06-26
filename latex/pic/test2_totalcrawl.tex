@@ -1,32 +1,31 @@
-% \documentclass{standalone} 
-% standalone mode causes trouble when using tikz
-
-\documentclass[varwidth]{standalone}
-% \documentclass[varwidth]{article}
-\usepackage{tikz}
-\usetikzlibrary{datavisualization}
-\usetikzlibrary{datavisualization.formats.functions}
+\documentclass{standalone}
+\usepackage{pgfplots}
 
 \begin{document}
-	\begin{tikzpicture}[baseline]
-	\datavisualization [
-		scientific axes={clean, standard labels},
-		% school book axes,
-		% style sheet=strong colors,
-		% style sheet=vary dashing,
-		x axis = {label={[node style={}]{\scriptsize$t$}}},
-		y axis = {label={[node style={}]{\scriptsize Expectation}}},
-	][
-		visualize as line=expo,
-		expo = {style = orange},
-		expo={pin in data={text={\scriptsize Estimated $E_h[G[t]]$},when=x is 70}}
-	]data [format=function] {
-		var x : interval [5:100];
-		func y = (\value x+5) /3*(exp(-(\value x+5)/2)-1+0.5*(\value x+5))+7.9;
-	}[
-		visualize as scatter=points,
-		points = {style = blue},
-		points = {pin in data={text={\scriptsize$E_h[G[t]]$}, when=x is 47.5}}
-	] data [headline={x, y}, read from file="data/totalcrawl.dat"];
+	\pgfplotstableread{
+		x	y
+		1	11925
+		2	11930
+		3	11930
+		4	11942
+		5	11950
+		6	11989
+		7	11977
+		8	11961
+		9	11957
+		10	11969
+	}{\pistonkinetics}
+	
+	\begin{tikzpicture}[scale=1]
+	\begin{axis}[
+	minor tick num=1, 
+	xlabel=Total Crawl Times,
+	ylabel=Latency Expectation (min)]
+	\addplot [dashed,red,very thick] 
+	table [x={crawlnum}, y={easicrawl}] {\pistonkinetics};
+	\addplot [dashed,blue,very thick] 
+	table [x={crawlnum}, y={randcrawl}] {\pistonkinetics};
+	\legend{EasiCrawl, RandomCrawl}
+	\end{axis}
 	\end{tikzpicture}
 \end{document}

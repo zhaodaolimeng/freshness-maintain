@@ -10,6 +10,7 @@ function [opt,arrange,rate,plans] = EasiCrawl(lambdaList,timeTable,crawlLimitLis
 % eps, 1, threshold of improvement method
 % iteratorLimit, N, maximal iteration times
 % sensorWeight, N, importance of sensors
+% sensorType, N, 1==DP Scheduling & 2==Greedy Scheduling & 3= Evenly
 % ---
 % opt, 1, minimal value
 % arrange, N, best arrangement for each sensor

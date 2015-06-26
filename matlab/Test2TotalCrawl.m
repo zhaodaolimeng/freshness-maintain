@@ -11,17 +11,21 @@ discreteStep = 2;
 eps = 10;
 iteratorLimit = 20;
 crawlLimitList = randi([mincs,maxcs],1,sensors);
+sensorWeight = ones(1,sensors);
+sensorType = ones(1,sensors);
 
 % Total count of crawls
 crawlStep = 1;
 crawlList = 10:50;
 
 resultList = zeros(size(crawlList));
-
+resultRList = zeros(size(crawlList));
 for i = crawlList 
     sumOfCrawl = i * crawlStep;
-    [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit);
+    [opt,arrange] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit,sensorWeight,sensorType);    
     resultList(i) = opt;
+    [opt,arrange] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
+    resultRList(i) = opt;
 end
-
-plot(resultList);
+plot([resultList;resultRList]');
+save('Test2.mat','resultList','resultRList');

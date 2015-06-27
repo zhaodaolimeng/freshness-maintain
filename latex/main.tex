@@ -371,7 +371,15 @@ The total number of crawls the server can at most start during a period is a ver
 	\label{fig:test2_totalcrawl}
 \end{figure}
 
+\subsection{Discretization Step Length}
 
+\begin{figure}
+	\centering
+	\includestandalone[width=\linewidth]{pic/test3_discretestep}
+	\captionsetup{justification=centering}
+	\caption{Latency Expectation With Different Crawls}
+	\label{fig:test3_discretestep}
+\end{figure}
 
 \subsection{Evaluation of Strategy Choose}
 
@@ -383,7 +391,7 @@ Xively is a platform which integrates IoT sensors. With hundreds of available se
 We use airqualityegg\cite{airegg} sensors located in London and radiation sensors in Tokyo as candidates. 
 
 
-In a strict sense, what we mean by accessing the sensors is actually accomplished by query the Xively database which hold the up-to-date sensor information, however this makes no different for us than directly accessing a real sensor. Another problem is that most raw sensors on xively don't support semantic senor description functions. So we add a layer, which translate raw data streams to event descriptions. A sudden raise in temperature or violation of radiation limit are taken as events, and will be stored as a description, which is the target to be crawled.
+In a strict sense, what we mean by accessing the sensors is actually accomplished by query the Xively database which hold the up-to-date sensor information. However, this makes no different for us than directly accessing a real sensor. Another problem is that most raw sensors on Xively don't support semantic senor description functions. So we add a describing layer, which translate raw data streams to event descriptions. A sudden raise in temperature or violation of radiation limit are taken as events, and will be stored as a description, which is the target to be crawled.
 
 
 
@@ -477,5 +485,8 @@ If $t_s$ is at a hibernate cycle, then the result expectation is just as the one
 \]
 
 Combine expression \eqref{ExpectSleep} and \eqref{Eftts}, the expectation of freshness latency is defined in the problem of hibernate involved crawling.
+
+\subsection{Convexity of $E_f(t,t_s)$}
+
 
 \end{document}

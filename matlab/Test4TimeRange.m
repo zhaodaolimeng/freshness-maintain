@@ -12,9 +12,9 @@ eps = 10;
 iteratorLimit = 20;
 sumOfCrawl = 100;
 
-% Generate Event
-
-
+% Time Range
+timeList = 1:20;
+timeRangeStep = 50;
 
 
 discreteStep = 2;
@@ -22,3 +22,7 @@ discreteStep = 2;
 
 % Total count of crawls
 
+for i = timeList
+    timeRange = timeRangeStep * i;
+    
+end

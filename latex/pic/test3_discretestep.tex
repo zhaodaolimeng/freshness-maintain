@@ -1,62 +1,57 @@
 \documentclass{standalone}
+\usepackage{tikz}
 \usepackage{pgfplots}
 
 \begin{document}
 	\pgfplotstableread{
-		crawlnum    easicrawl   randcrawl
-		10	19319.00286	20369.37529
-		11	16705.34886	20721.82257
-		12	14662.79751	19179.89242
-		13	12758.36759	18742.94868
-		14	11056.62788	18716.08365
-		15	9433.443288	17036.42585
-		16	8475.103488	18098.5525
-		17	7578.339062	16018.18536
-		18	6739.45201	15459.1101
-		19	6173.738541	12326.77596
-		20	5625.308228	16330.51701
-		21	5129.830635	13545.50195
-		22	4692.945402	11612.26336
-		23	4268.572919	13035.96186
-		24	3931.965964	13869.06141
-		25	3639.109668	13588.05769
-		26	3352.533346	12514.13123
-		27	3090.921177	10691.67169
-		28	2829.555777	10886.79048
-		29	2583.969953	12988.29514
-		30	2386.878871	11581.28975
-		31	2228.475598	10292.95021
-		32	2100.350968	10430.34708
-		33	2002.654495	11369.44577
-		34	1906.971706	8930.333444
-		35	1824.184369	9029.071563
-		36	1755.194922	6866.554123
-		37	1691.914501	8078.758506
-		38	1628.634081	7324.413252
-		39	1566.543578	8232.10831
-		40	1526.94276	6524.842297
-		41	1495.232194	9401.017088
-		42	1471.471703	7841.217424
-		43	1448.47522	6185.004362
-		44	1428.674811	7357.806493
-		45	1411.664538	9448.029677
-		46	1399.773075	7265.41513
-		47	1389.324181	7462.389371
-		48	1381.39654	8509.638442
-		49	1373.468898	5025.394412
-		50	1367.090046	7301.723868
-	}{\pistonkinetics}
+		steplength    latency   duration
+		1	24013	0.9375
+		2	24018	0.2813
+		3	24018	0.1406
+		4	24034	0.1094
+		5	24060	0.0781
+		6	24059	0.0313
+		7	24097	0.0469
+		8	24145	0.0469
+		9	24126	0.0469
+		10	24112	0.0625
+		11	24115	0.0469
+		12	24110	0.0469
+		13	24122	0.0156
+		14	24151	0.0469
+		15	24183	0.0469
+		16	24229	0.0469
+		17	24276	0.0625
+		18	24315	0.0313
+		19	24332	0.0469
+		20	24332	0.0625
+	}{\discretesteptable}
 	
-	\begin{tikzpicture}[scale=1]
+	\begin{tikzpicture}
+	\pgfplotsset{
+		scale only axis,
+		scaled x ticks=base 10:3,
+		xmin=0, xmax=22}
+	
 	\begin{axis}[
-	minor tick num=1, 
-	xlabel=Total Crawl Times,
+	axis y line*=left,
+	ymin=24000, ymax=25000,
+	xlabel=Discrete Step Length,
 	ylabel=Latency Expectation]
-	\addplot [dashed,red,very thick] 
-	table [x={crawlnum}, y={easicrawl}] {\pistonkinetics};
-	\addplot [dashed,blue,very thick] 
-	table [x={crawlnum}, y={randcrawl}] {\pistonkinetics};
-	\legend{EasiCrawl, RandomCrawl}
+	
+	\addplot[smooth,mark=x,red] table [x={steplength}, y={latency}] {\discretesteptable};
+	\label{plot_one}
+	\end{axis}
+	
+	\begin{axis}[
+	axis y line*=right,
+	axis x line=none,
+	ymin=0, ymax=1,
+	ylabel=Execution Time,
+	ylabel near ticks, yticklabel pos=right]
+	\addplot[smooth,mark=o,green] table [x={steplength}, y={duration}] {\discretesteptable};
+	\addlegendentry{Execution Time}
+	\addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Latency Expectation}
 	\end{axis}
 	\end{tikzpicture}
 \end{document}

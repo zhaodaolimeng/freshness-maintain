@@ -40,6 +40,7 @@
 	ylabel=Latency Expectation]
 	
 	\addplot[smooth,mark=x,red] table [x={steplength}, y={latency}] {\discretesteptable};
+	\addlegendentry{Latency Expectation}
 	\label{plot_one}
 	\end{axis}
 	
@@ -49,7 +50,7 @@
 	ymin=0, ymax=1,
 	ylabel=Execution Time,
 	ylabel near ticks, yticklabel pos=right]
-	\addplot[smooth,mark=o,green] table [x={steplength}, y={duration}] {\discretesteptable};
+	\addplot[smooth,mark=o,blue] table [x={steplength}, y={duration}] {\discretesteptable};
 	\addlegendentry{Execution Time}
 	\addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Latency Expectation}
 	\end{axis}

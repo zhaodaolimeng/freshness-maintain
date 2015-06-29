@@ -26,7 +26,7 @@
     \begin{axis}[
         axis y line*=left,
         ymin=0, ymax=170000,
-        xlabel=Sensor number,
+        xlabel=Number of Sensors,
         ylabel=Latency Expectation]
     
     \addplot[smooth,mark=x,red] table 
@@ -41,7 +41,7 @@
         [x={sensors}, y={none}] {\discretesteptable};
     \addlegendentry{100\% greedy}
     
-    \addplot[smooth,mark=square,green] table 
+    \addplot[smooth,mark=square, brown] table 
         [x={sensors}, y={rand}] {\discretesteptable};
     \addlegendentry{Random schedule}
     

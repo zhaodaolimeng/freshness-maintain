@@ -1,0 +1,77 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+
+\begin{document}
+\pgfplotstableread{
+    iterate result1 result2
+    1	0	0
+    2	0	0
+    3	0	0
+    4	6	0
+    5	11	1
+    6	35	3
+    7	41	1
+    8	49	4
+    9	35	11
+    10	13	14
+    11	6	15
+    12	3	29
+    13	1	22
+    14	0	22
+    15	0	26
+    16	0	15
+    17	0	15
+    18	0	5
+    19	0	6
+    20	0	7
+    21	0	1
+    22	0	2
+    23	0	0
+    24	0	0
+    25	0	1
+    26	0	0
+    27	0	0
+    28	0	0
+    29	0	0
+    30	0	0
+}{\resultTable}
+
+	\begin{tikzpicture}
+	\begin{axis}[
+	% title = {Optimization based upon co-occurences},
+	% width=10cm,
+	% xtick={0,1,...,30},
+	% xticklabels={0,1,...,30},
+	grid=major,
+	ybar,
+	bar width=2,
+	ylabel= {Latency Expectation (s)},
+	xlabel={Number of Sensors},
+	legend pos= north east]
+	
+	
+	\addplot[
+		fill=blue!25,
+		draw=black,
+		point meta=y,
+		every node near coord/.style={inner ysep=5pt},
+		error bars/.cd,
+		y dir=both,
+		y explicit
+	] table [x={iterate}, y={result1}] {\resultTable};
+	
+	\addplot[
+		fill=red!25,
+		draw=black,
+		point meta=y,
+		every node near coord/.style={inner ysep=5pt},
+		error bars/.cd,
+		y dir=both,
+		y explicit
+	] table [x={iterate}, y={result2}] {\resultTable};
+	
+	\draw ({rel axis cs:0,0}|-{axis cs:0,0}) -- ({rel axis cs:1,0}|-{axis cs:0,0});
+	\legend{EasiCrawl,RandomCrawl};
+	\end{axis}
+	\end{tikzpicture}
+\end{document}

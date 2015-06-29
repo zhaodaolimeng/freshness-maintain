@@ -52,9 +52,9 @@
 	minor tick num=1, 
 	xlabel=Total Crawl Times,
 	ylabel=Latency Expectation (s)]
-	\addplot [dashed,red,very thick] 
+	\addplot [smooth,mark=x,red] 
 	table [x={crawlnum}, y={easicrawl}] {\pistonkinetics};
-	\addplot [dashed,blue,very thick] 
+	\addplot [smooth,mark=o,blue] 
 	table [x={crawlnum}, y={randcrawl}] {\pistonkinetics};
 	\legend{EasiCrawl, RandomCrawl}
 	\end{axis}

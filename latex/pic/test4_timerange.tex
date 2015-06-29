@@ -1,0 +1,59 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\begin{document}
+	\pgfplotstableread{
+		timeRange   duration latency
+		50	0.0156	100
+		100	0.0625	1300
+		150	0.0938	7000
+		200	0.1719	22300
+		250	0.25	38400
+		300	0.4844	50700
+		350	0.8281	92900
+		400	1.6094	154300
+		450	2.3281	220900
+		500	3.5938	294600
+		550	4.2344	363500
+		600	11.3594	500300
+		650	7.3438	504900
+		700	13.0469	716700
+		750	11.8438	777900
+		800	16.9375	912000
+		850	24.375	1195100
+		900	22.7344	1206900
+		950	36.2656	1572000
+		1000	44.625	1768300
+	}{\discretesteptable}
+	
+	\begin{tikzpicture}
+	\pgfplotsset{
+		scale only axis,
+		xmin=0, xmax=1000,
+		legend pos= north west}
+	
+	\begin{axis}[
+	axis y line*=left,
+	ymin=0, ymax=1800000,
+	xlabel=Time Range,
+	ylabel=Latency Expectation]
+	
+	\addplot[smooth,mark=x,red] table 
+	[x={timeRange}, y={latency}] {\discretesteptable};
+	\addlegendentry{Latency Expectation}
+	\label{plot_one}
+	\end{axis}
+	
+	\begin{axis}[
+	axis y line*=right,
+	axis x line=none,
+	ymin=0, ymax=50,
+	ylabel=Execution Time,
+	ylabel near ticks, yticklabel pos=right]
+	\addplot[smooth,mark=o,blue] table [x={timeRange}, y={duration}] {\discretesteptable};
+	\addlegendentry{Execution Time}
+	\addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Latency Expectation}
+	\end{axis}
+	\end{tikzpicture}
+\end{document}

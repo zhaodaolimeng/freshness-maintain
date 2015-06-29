@@ -1,4 +1,4 @@
-function [opt,arrange,rate,plans] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit,sensorWeight,sensorType)
+function [opt,arrange,rate,plans,iteratecnt] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit,sensorWeight,sensorType)
 %%
 % Compute best schedule given timetable and event density predication
 % --
@@ -28,10 +28,12 @@ for i=1:sensors
 end
 optFirst = 0;
 optLast = 0;
+iteratecnt = 0;
 for i=1:iteratorLimit
     oldopt = opt;
     [memo,opt,arrange] = ImproveSolution(memo,arrange,distanceMatrix,crawlLimitList,sensorWeight,sensorType);    
     disp(['opt = ' num2str(opt) ' arrange = ' mat2str(arrange)]);
+    iteratecnt = iteratecnt + 1;
     if i == 1 ;optFirst = opt; end
     if i == iteratorLimit ;optLast = opt; end
     if abs(opt-oldopt)<eps

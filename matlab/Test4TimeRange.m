@@ -12,7 +12,7 @@ crawlLimitList = randi([mincs,maxcs],1,sensors);
 % timeTable = MakeTimeTable(sensors,maxwp,minwp,maxwr,minwr,timeRange);
 eps = 10;
 iteratorLimit = 20;
-sumOfCrawl = 100;
+sumOfCrawl = 30;
 sensorWeight = ones(1,sensors);
 sensorType = ones(1,sensors);
 

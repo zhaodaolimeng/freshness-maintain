@@ -1,0 +1,50 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\begin{document}
+\pgfplotstableread{
+	sensors   all half  none rand
+	10	4950	5110	6310	16190
+    20	28690	31490	31490	37280
+    30	20770	21490	22000	67670
+    40	21140	24900	28220	75240
+    50	83210	84300	84300	113550
+    60	39150	41150	43930	87590
+    70	72280	74010	75770	137260
+    80	69730	73310	79760	175990
+    90	88800	95960	104520	171910
+    100	159360	161910	163270	225140
+}{\discretesteptable}
+
+\begin{tikzpicture}
+    \pgfplotsset{
+        scale only axis,
+        xmin=0, xmax=100,
+        legend pos= north west}
+    
+    \begin{axis}[
+        axis y line*=left,
+        ymin=0, ymax=170000,
+        xlabel=Sensor number,
+        ylabel=Latency Expectation]
+    
+    \addplot[smooth,mark=x,red] table 
+        [x={sensors}, y={all}] {\discretesteptable};
+    \addlegendentry{100\% dp}
+    
+    \addplot[smooth,mark=o,blue] table 
+        [x={sensors}, y={half}] {\discretesteptable};
+    \addlegendentry{50\% dp, 50\% greedy}
+    
+    \addplot[smooth,mark=star,orange] table 
+        [x={sensors}, y={none}] {\discretesteptable};
+    \addlegendentry{100\% greedy}
+    
+    \addplot[smooth,mark=square,green] table 
+        [x={sensors}, y={rand}] {\discretesteptable};
+    \addlegendentry{Random schedule}
+    
+    \end{axis}
+\end{tikzpicture}
+\end{document}

@@ -1,4 +1,4 @@
-function [opt,arrange] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep)
+function [opt,arrange,plans] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep)
 %% 
 % A random method to generate a schedule strategy for sensors
 sensors = length(lambdaList);
@@ -20,6 +20,9 @@ for sensor = 1:sensors
     end
     expect = expect + dist(lastNode, numberOfNodes);
     opt = opt + expect;    
+    
+    lastCycle = timeTable(sensor).value(end,:);    
+    plans(sensor).value = [crawls lastCycle(1)+lastCycle(2)];    
 end
 disp(['opt = ' num2str(opt) ' arrange = ' mat2str(arrange)]);
 end

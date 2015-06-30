@@ -47,7 +47,7 @@ function [expect] = LatencyExpectation(timeline,lambda,stime,etime)
 
 expect = 0;
 done = false;
-for lastCycle=length(timeline):-1:1
+for lastCycle=size(timeline,1):-1:1
     if timeline(lastCycle,1)<=etime
         if timeline(lastCycle, 1) <= stime
             expect = lambda * (etime - stime)^2;

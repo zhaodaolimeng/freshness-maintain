@@ -126,3 +126,4 @@ sympy-plots-for-*.tex/
 *.sav
 latex/main.log
 latex/main.pdf
+latex/main.out

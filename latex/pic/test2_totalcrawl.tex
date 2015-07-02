@@ -50,8 +50,8 @@
 	\begin{tikzpicture}[scale=1]
 	\begin{axis}[
 	minor tick num=1, 
-	xlabel=Total Crawl Times,
-	ylabel=Latency Expectation (s)]
+	xlabel=Total Crawl Limits,
+	ylabel=Latency Expectation (min)]
 	\addplot [smooth,mark=x,red] 
 	table [x={crawlnum}, y={easicrawl}] {\pistonkinetics};
 	\addplot [smooth,mark=o,blue] 

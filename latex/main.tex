@@ -25,6 +25,7 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{fixltx2e}
+\usepackage{subcaption}
 
 \usetikzlibrary{datavisualization}
 \usetikzlibrary{shapes,arrows,shadows}
@@ -125,7 +126,7 @@ In order to choose an appropriate strategy, we hold an assumption that the senso
 	\label{fig:architecture}
 \end{figure}
 
-Considering the stability and standardization advantages, in this paper the pull-based architecture is chose as the basic framework to study IoT crawl scheduling problem. The framework is illustrated by Fig.\ref{fig:architecture}. 
+Consider about the stability and standardization advantages, we use the pull-based architecture as the basic framework to study IoT crawl scheduling problem. The architecture of this pull-based IoT search system is illustrated by Fig.\ref{fig:architecture}. 
 We assume the user only interest in the events monitored by corresponded sensors, which arrives periodically or just randomly. With the help of semantic IoT method, IoT sensors capture the event stream, and continuously store these events, and update their description files correspondingly. In this manner, the description file reveal the realtime state of sensors. IoT search engine regularly access the IoT descriptions, then updates the related repository. CoAP with CoRE resource description method can be used as standardized protocol for sensors and devices, and the description messages are listed in the ./well-know file used in the CoRE framework. 
 
 
@@ -196,14 +197,24 @@ The details of latency measurement are presented in the appendices.
 We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or none-periodic sleep sensors. At last, we discuss the strategy for sensors whose sleep plan is previously unknown.
 
 \subsection{Method Framework}
-EasiCrawl compute for optimal or near optimal schedule strategy providing different models, given a fixed crawl time.
-In previous section, we figure out the relationship between the number of crawls and the expectation of latency $E_L(n)$. 
-Now the object function of formulation \ref{OBJ} can be rewrite as $\sum_{i=1}^{N} \omega_i E_L(n_i)$. The bandwidth constraint can be taken as $\sum_{i=1}^{N} n_i < M$ and the energy constraint of single sensor can be rewrite as $n_i<\gamma_i$.
+The main idea of EasiCrawl is to distribute crawl chances to sensors according to their performance in reduction of latency expectation.
+EasiCrawl use an iterative method to improve the final schedule plan step by step. 
+In each iteration, it compute the optimal or near optimal schedule according to the sensor's future sleep plan, and try to redistribute the arrangement for a better global latency expectation.
 
 
-Once crawl times $n$ is chosen, then the optimal crawl strategy for a single sensor is determined, and every function of $E_L(n)$ is non-decreasing,  we design a naive approach which is very similar to SMO\cite{Platt1998}. 
-The big figure is to dispatch crawl time and continuously refine the dispatch strategy until no improvement can be made.
-First we dispatch the $M$ crawl time to $N$ sensors according to $\omega_i$. Then we start to search sensors for a pair $i$, $j$. If $i\gets i-1$ and $j\gets j+1$ will cause a largest improvement to the object function compared to the other pairs, then changes of $i$ and $j$ are conformed. Continue this process until none improvement can be made.
+Suppose the latency expectation of sensor $i$ is $E_L^{i}(n)$, given the number of crawls $n_i$.
+The object function of formulation \ref{OBJ} can be rewrite as $\sum_{i=1}^{N} \omega_i E_L^{i}(n_i)$. The total crawl time constraint can be taken as $\sum_{i=1}^{N} n_i < M$ and the energy constraint of single sensor can be rewrite as $n_i<\gamma_i$.
+Once crawl times $n_i$ is chosen, the optimal crawl strategy for a single sensor is determined. Here, every function of $E_L(n)$ is non-decreasing. 
+To iteratively improve the global result, we design an approach which is similar to SMO\cite{Platt1998}. 
+First we dispatch the $M$ crawl time to $N$ sensors according to $\omega_i$. Then we start to search sensors for a pair $i$, $j$, where $i$, $j$ are both arrangements. If $i\gets i-1$ and $j\gets j+1$ will cause a largest improvement to the object function compared to the other pairs, then changes of $i$ and $j$ are conformed. This process will be continued until none improvement can be made. 
+The above is the main idea of EasiCrawl.
+
+
+In addition, the feasibility of this method is based on a preliminary that $E_L(n)$ are convex. 
+To proof this, since crawl times $n$ is an discrete value, we can just illustrated the latency decrease of adding a new crawl to a sensor is less than that of the previous addition.
+Here we assume the latency expectation function $E_h[G(t)]$ is convex, which is proofed in the appendix. It's easy to show the convexity of $E_L(n)$ if the $t$ is continuous, where the convexity of $E_L(n) = n E_h[G(t/n)]$ can be proofed by the convex preserve operations. However, the time nodes $t$ used in the follow method is discretized, and the sleep plan of sensors are actually not continuous. In this sense, the convexity of $E_L(n)$ are verified in the evaluation section by simulation, where the result is quite supportive.
+
+In this paper, sensors are classified into 3 types, which can be solved mainly by 2 kinds of method. We proposed a dynamic programming method for the optimal scheduling, but find the time complexity is somewhat unacceptable. So, a greedy method is designed as a complementary. We also discuss the situation when the sensors' sleep plan is unknown in the following part.
 
 \subsection{If Sleep Plan is Unknown}
 To our best knowledge, for the unknown sleep pattern case, if there are no previous knowledge for the sleep behavior, the detection and scheduling can be formed as an multi-armed bandit problem, which is know NP-hard. If there are no latent pattern for sleep behavior, then there will be not optimal strategy expect for periodically sensor querying, which is definitely an inefficiency schedule method. 
@@ -283,7 +294,7 @@ The evenly crawl proposition here can be proved by the convexity of $E_h[G(t)]$ 
 We start the proof with a simple situation where only two crawling are allowed. 
 As a result, the whole expectation gain during $[0,T]$, which is marked as $F(0, T)$, is divided into two part, $f(t)$ and $f(T-t)$. With the convexity of $f(t)$, we get $2f(T/2)<f(T/2-\epsilon)+f(T/2+\epsilon)$ for $\forall{\epsilon>0}$. By substituting $F(T)=f(t)+f(T-t)$ into it, we get $F(T/2)<F(T/2+\epsilon)$ for $\forall{\epsilon>0}$, indicating $T/2$ is the minimum point of $F(t)$.
 This conclusion can be generalized to a normal situation where multiply crawling are committed with the following induction. 
-Now suppose there are $n$ crawling action, among which first $n-1$ action evenly divide the timeline. The time length of $n$-th crawling action does not equal to the adjacent one's, and we claimed this strategy is optimal. For any adjacent pair divided by a single crawling action, if the division is not evenly, we can choose the evenly one as a new strategy, which can lead to a larger $F(t)$ according to the proposition above, which is a contradiction.
+Now suppose there are $n$ crawling action, among which first $n-1$ action evenly divide the timeline. The time length of $n$-th crawling action does not equal to the adjacent one's, and we claimed this strategy is optimal. For any adjacent pair divided by a single crawling action, if the division is not evenly, we can choose the evenly one as a new strategy, which can lead to a larger $f(t)$ according to the proposition above, which is a contradiction.
 \end{IEEEproof}
 
 
@@ -343,106 +354,108 @@ The result can be computed in one pass, so the complexity of this approach is $O
 
 In the evaluation section, we first test the performance of EasiCrawl under different parameters, and confirm the effectiveness with real events sequence. Latency expectation which are previously used as a optimization object are taken as measurement.
 Then, we carry out a simulation comparing efficiency and computation complexity of 3 different crawl methods implemented in EasiCrawl. Here the latency sum of generated events and executing duration are considered as measurements.
-Sensor scales $N$, total crawl limit $\theta$, discretization step length $\epsilon$, and time range $T$ of scheduling are tested during the following simulations. We use a random schedule method, called RandomCrawl, to illustrate the effectiveness of our method. RandomCrawl use the same method as EasiCrawl to initialize the arrangement of crawls to different sensors. Then, for each sensor, the crawl plan are set randomly, the last timestamp are chosen to ensure all the event are captured.
+Sensor scales $N$, total crawl limit $\theta$, discretization step length $\epsilon$, and time range $T$ of scheduling are tested during the following simulations. We use a random schedule method, called RandomCrawl, to illustrate the effectiveness of our method. RandomCrawl use the same method as EasiCrawl to initialize the arrangement of crawls to different sensors. Then, for each sensor, the crawl plan are set randomly, the last timestamp are chosen to ensure all the event are captured. In addition, the time unit of these simulation are all minutes, and we take 1 min as the minimum unit that can be used for scheduling.
 All these simulation are implemented on a PC with MATLAB.
+\begin{figure*}
+	\minipage{0.32\textwidth}
+		\includestandalone[width=\linewidth]{pic/test1_sensorscale}
+		\captionsetup{justification=centering}
+		\caption{Latency Expectation With Different Sensor Scales}
+		\label{fig:test1_sensorscale}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}
+		\includestandalone[width=\linewidth]{pic/test2_totalcrawl}
+		\captionsetup{justification=centering}
+		\caption{Latency Expectation With Different Crawls}
+		\label{fig:test2_totalcrawl}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}%
+		\includestandalone[width=\linewidth]{pic/test3_discretestep}
+		\captionsetup{justification=centering}
+		\caption{Latency Expectation With \\Different Discretization Step}
+		\label{fig:test3_discretestep}
+	\endminipage
+	
+	\minipage{0.32\textwidth}
+		\includestandalone[width=\linewidth]{pic/test4_timerange}
+		\captionsetup{justification=centering}
+		\caption{Latency Expectation With \\Different Total Time Range}
+		\label{fig:test4_timerange}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}
+		\includestandalone[width=\linewidth]{pic/test5_sensortype}
+		\captionsetup{justification=centering}
+		\caption{Latency Expectation With \\Different Sensor Types}
+		\label{fig:test5_sensortype}
+	\endminipage\hfill
+	\minipage{0.32\textwidth}%
+		\includestandalone[width=\linewidth]{pic/test6_convergespeed}
+		\captionsetup{justification=centering}
+		\caption{Converge Speed under \\Different Crawl Times}
+		\label{fig:test6_convergespeed}
+	\endminipage	
+\end{figure*}
 
-\subsection{Sensor Scales}
-We first study the impact of sensor scale. Here we assume all the sleep plan of sensors are previously known, and non-periodic. The dynamic programming schedule method of single sensor are actually test in this simulation. The total crawl limit $\theta$ is set as the multiple of sensor scale, varies from 10 to 200. The Poisson parameter $\lambda$ of each sensor is randomly chosen from 0 to 1. The schedule time range $T$ is set as 200 seconds. For each sensor scale, we repeated the simulation for 5 times, and compute the average, minimum and maximum value of latency expectations. Simulation result is plot in Fig. \ref{fig:test1_sensorscale}.
-
-\begin{figure}
-	\centering
-	\includestandalone[width=\linewidth]{pic/test1_sensorscale}
-	\captionsetup{justification=centering}
-	\caption{Latency Expectation With Different Sensor Scales}
-	\label{fig:test1_sensorscale}
-\end{figure}
-
-Simulation result shows a promising result. The latency expectation of EasiCrawl is far below the random one, even take error bar into consideration. This is mainly because the theoretical optimal property of EasiCrawl when given a sequence of discretized time nodes. 
-
-\subsection{Total crawl times}
-
-The total number of crawls the server can at most start during a period is a very important parameter for practical use. 
+\subsection{Sensor Scales $N$}
+We first study the impact of sensor scale. We mainly test the dynamic programming schedule method of single sensor in this simulation. All the sleep plan of sensors are previously known and non-periodic, actually we use a randomized method to generate the sleep plan for each sensor. The total crawl limit $\theta$ is set as the multiple of sensor scale, varies from 10 to 200. The Poisson parameter $\lambda$ of each sensor is randomly chosen from 0 to 1. The schedule time range $T$ is set as 200 time units. In each improvement iteration, the crawl time arrangement $n_i$ for different sensors are changed by the step length of 1. For each sensor scale, we repeated the simulation for 5 times, and compute the average, minimum and maximum value of latency expectations. Simulation result is plot in Fig. \ref{fig:test1_sensorscale}.
 
 
-\begin{figure}
-	\centering
-	\includestandalone[width=\linewidth]{pic/test2_totalcrawl}
-	\captionsetup{justification=centering}
-	\caption{Latency Expectation With Different Crawls}
-	\label{fig:test2_totalcrawl}
-\end{figure}
+Simulation shows a promising result. The latency expectation of EasiCrawl is far below the random one, even take error bar into consideration. This is mainly because the theoretical optimal property of EasiCrawl when given a sequence of discretized time nodes. 
 
-\subsection{Discretization Step Length}
+\subsection{Total Crawl Times $\theta$}
 
-\begin{figure}
-	\centering
-	\includestandalone[width=\linewidth]{pic/test3_discretestep}
-	\captionsetup{justification=centering}
-	\caption{Latency Expectation With Different 
-		\\Discretization Step Length}
-	\label{fig:test3_discretestep}
-\end{figure}
+The total number of crawls which the server can at most start is an important constraint for EasiCrawl. In this test, EasiCrawl worked on sensor scale of 10, crawling time range of 200, and discrete step length of 2, where minute is the unit. We use RandomCrawl as a reference, and test 40 different crawl limits on EasiCrawl and RandomCrawl, ranging from 10 to 50, which show a result as Fig.\ref{fig:test2_totalcrawl}.
+The result first show the advantages of EasiCrawl against RandomCrawl. More important, we notice there's a submodular trends for total crawls, which means the gain of server side crawl ability pay less when limits grow larger, and this result is theoretically reasonable. This suggest us to find a proper trade-off of server cost and schedule efficiency.
+
+\subsection{Discretization Step Length $\epsilon$}
+
+Time table of sleep plans should be discretized before starting scheduling. There is a trade off between the computation time and final accuracy. 
+We use a simulation with 10 sensors and a time range $T$ of 500, to test the relationship between time complexity and expectation accuracy. All the sensors are set to be scheduled with dynamic programming based method. The total crawl count $\theta$ is set to 100 times.
+We carried on 20 groups of test, where the discretization step length $\epsilon$ ranges from 1 to 20.
+Fig.\ref{fig:test3_discretestep} shows a positive result to our analysis of the dynamic programming crawl method used in EasiCrawl. While latency expectation increase about 400 units, the computation time decreased from 1 seconds to below 0.1 seconds. This result fits the theoretical analysis, where for scheduling each sensor, the time complexity is $O(T^{2}n)$, $n$ is the crawl limit.
+When $\epsilon$ is relatively small, the number $M$ of total time nodes which can used to crawl is large, which leads to a higher computation cost.
 
 \subsection{Time Range $T$}
 
-\begin{figure}
-	\centering
-	\includestandalone[width=\linewidth]{pic/test4_timerange}
-	\captionsetup{justification=centering}
-	\caption{Latency Expectation With Different 
-		\\Total Time Range}
-	\label{fig:test4_timerange}
-\end{figure}
+We use the same experiment settings as previous. 10 simulated sensors are used, the total crawl sum $\theta$ is 30. For time range $T$ varies from 50 to 1000, a new time table is generated in each iteration. The time range $T$ which EasiCrawl schedules on has a similar effect as the discretization step $\epsilon$. 
+The computation time showed in Fig.\ref{fig:test4_timerange} is very close to the analysis result, which is quadratic. The expectation share a similar shape because the distance between the distribution and the end time $t$ can also be estimated as a quadratic function.
 
-\subsection{The Impact of Senors' Types}
+\subsection{Senors' Types}
 
-\begin{figure}
-	\centering
-	\includestandalone[width=\linewidth]{pic/test5_sensortype}
-	\captionsetup{justification=centering}
-	\caption{Latency Expectation With Different 
-		\\Sensor Types}
-	\label{fig:test5_sensortype}
-\end{figure}
+In the previous evaluations, the DP(dynamic programming) methods are used for finding the best schedule for each sensors. In this test, both the greedy method and dynamic programming are both tested. 
+Tests are performed for 10 times with different sensor scale varies from 10 to 100. 4 different group of sensors are used for each test. Sensors in the first group are all scheduled with DP method. In the second group, half of the sensors are, while the other half use greedy based method. The third group used pure greedy based method. We also use the RandomCrawl method as a reference, which is the fourth group.
+Result are showed in Fig.\ref{fig:test5_sensortype}. As our expect, DP method performs the best. With the share of greedy method grows, the latency expectation become larger. When all the sensors use greedy method for scheduling, the latency expectation is the worst, but still much better than that of RandomCrawl.
 
 \subsection{Speed of Convergence}
+The speed of convergence directly affect the efficiency of the total computation cost. Here we set up a test with two different total crawl times $\theta$, to verify the iteratively optimize method. The time range $T$ here is chose to be 400 time unit. We separately perform this test, first use a total crawl limit $\theta$ of 50, then 100. The sleep plan of sensors and other parameters are the same. The total iterations used before reaching convergence is collected.
+Fig.\ref{fig:test6_convergespeed} is the final statistics, where the iteration steps for different experiment setting is close to Gaussian distribution. Apparently, when the number of total crawls grow bigger, a larger mean value is expected.
 
-\begin{figure}
-	\centering
-	\includestandalone[width=\linewidth]{pic/test6_convergespeed}
-	\captionsetup{justification=centering}
-	\caption{Latency Expectation With Different 
-		\\Discretization Step Length}
-	\label{fig:test6_convergespeed}
-\end{figure}
-
-
-\subsection{Evaluation of Strategy Choose}
-
-The greedy method and dynamic programming for scheduling sleep-enabled sensors are both tested.
-
-\section{Case Study With Xively.com}
+\section{Case Study With Xively}
 
 Xively is a platform which integrates IoT sensors. With thousands of sensors which can simply accessed with ip protocols, xively become a ideal platform for our crawl method.
 
 
-We have build a mini IoT search system to test our crawl scheduling method EasiCrawl, where we continuously monitored several datastream of airqualityegg\cite{airegg} sensors located in London as an example for our case study. 
+We built a mini IoT search system to test our crawl scheduling method EasiCrawl, where we continuously monitored several datastream of 3 airqualityegg\cite{airegg} sensors located in London and Tokyo as an example for our case study. 
 Practically, what we mean by accessing the sensors is actually accomplished by query the Xively database which hold the up-to-date sensor information. This makes no different for us than directly accessing a real sensor. One problem here is that most raw sensors on Xively don't support semantic senor description functions. So we add a describing layer, which translate raw data streams to event sequence. A sudden raise in temperature or violation of radiation limit are taken as events, and will be stored as a item of description, which is the target to crawl.
-Our main purpose is a
-
 \begin{figure}
 	\centering
 	\includestandalone[width=\linewidth]{pic/xivelycasestudy}
 	\captionsetup{justification=centering}
 	\caption{Crawl Plan Generated by EasiCrawl for \\
-		Data from Xively.com}
+		Data from Xively}
 	\label{fig:xivelycasestudy}
 \end{figure}
 
 
+In this case, the parameter for Poission process of the arriving event sequence are estimated previously.
+Fig.\ref{fig:xivelycasestudy} is the raw sensor data of 4 different data streams, including CO, Humidity, NO\textsubscript{2}, along with the corresponding scheduling result. The circle marks are the event captured and recorded which users may care. Here, we consider the high level of CO, NO\textsubscript{2}, are danger events, and the quick raise in temperature or quick changes in humidity may be the miss use of electrical equipments, which should be also recorded. We also consider the temperature changes not interesting, only to test the effectiveness of scheduling non-periodic sensors.
+The triangle marks are the actual crawls. EasiCrawl can always hold a low latency level, which is 2 to 3 times lower than that of RandomCrawl.
+
 \section{Conclusion}
 
-The pull-based and push-based analysis is the guidance.
+In this paper, we introduce EasiCrawl, a crawl scheduling strategy which runs an iteratively improving method. EasiCrawl can be used with different sensors, which is ideal to be used in IoT search system. Effectiveness of EasiCrawl is also showed in simulations and a case study with Xively. 
+The drawbacks of EasiCrawl lies in the blindness when crawling sensors whose sleep plan is unknown. 
+Also the fixed step length for improve arrangements, which is not a effect way for optimizing, needs to be improved.
 
 \section*{Acknowledgment}
 
@@ -460,11 +473,6 @@ The authors would like to thank...
 \bibliographystyle{unsrt}%{IEEEtran}%{unsrt}
 \bibliography{reference}
 
-
-%
-%
-%
-%
 
 \appendices
 \section{Analysis of Latency Expectation}
@@ -512,14 +520,14 @@ E_h[G(t)] = (t-T^{L}(K))^2\lambda + \sum_{i=1}^{K} (2 t - T^{w}_{K-i})T^{w}_{K-i
 \subsection{Convexity of $E_h[G(t)]$}
 Expression\eqref{ExpectSleepApprox} is a simplified form of $E_h[G(t)]$, and it's direct to show this expression is continuous and derivable. Here we try to compute the one-order derivative on $t$.
 \[\frac{\partial E_h[G(t)]}{\partial k} = \left\{
-\begin{array}{lr}
-c_i+\gamma_i t & \text{if }t \in [T^{L}_{i}, T^{L}_{i}+T^{w}]\\
-c_i & \text{if }t \in [T^{L}_{i}+T^{w}, T^{L}_{i+1}]
-\end{array}	\label{ExpectSleepAnother}
-\right.
+	\begin{array}{lr}
+	c_i+\gamma_i t & \text{if }t \in [T^{L}_{i}, T^{L}_{i}+T^{w}]\\
+	c_i & \text{if }t \in [T^{L}_{i}+T^{w}, T^{L}_{i+1}]
+	\end{array}	\numberthis \label{ExpectSleepAnother}
+	\right.
 \]
 
-The result is a continuous linear piecewise function, where $c_i$ and $\gamma_i$ are constraints. The meaning of expression\eqref{ExpectSleepAnother} is actually the gain speed of latency expectation. With expression\eqref{ExpectSleepAnother}, the second order derivation $\nabla E_h[G(t)]\geq0$ in its domain, and the convexity of function\eqref{ExpectSleepApprox} is proofed\cite{boyd2004convex}. 
+The result is a continuous linear piecewise function, where $c_i$ and $\gamma_i$ are constraints. The meaning of expression \eqref{ExpectSleepAnother} is actually the gain speed of latency expectation. With expression \eqref{ExpectSleepAnother}, the second order derivation $\nabla^{2} E_h[G(t)]\geq0$ in its domain, and the convexity of function \eqref{ExpectSleepApprox} is proofed\cite{boyd2004convex}. 
 
 
 \subsection{Expectation of Arbitrary Period}
@@ -528,7 +536,7 @@ Assume that $t_s\in [0,T^{c}_{1}]$, other case can be transformed to this by shi
 If $t_s$ is in a sleeping cycle, then expectation can just be calculated from the next work cycle.
 Otherwise, if $t_s$ is in a working cycle, the expectation can be estimate by $E_h[G(t)]$ which start at $0$ subtract the latency expectation cause by the events arriving at time $[0, t_s)$.
 
-We define $t'=t-(t_s\bmod\Delta T^{c}_{1})$ and $t''=t-T^{c}_{1}$ for convenience. 
+We define $t'=t-(t_s\bmod T^{c}_{1})$ and $t''=t-T^{c}_{1}$ for convenience, where $T^{c}_{1}$ is the length of first cycle.
 Here the minuend means the expectation at time point $t$ of latency during time period $[0, t_s]$.
 If $t_s$ is at a hibernate cycle, then the result expectation is just as the one which $t_s$ equals next duty cycle, which is $E_h[G(t')]$, which can be written as follows.
 \[E_f(t,t_s)=\left\{
@@ -540,6 +548,6 @@ If $t_s$ is at a hibernate cycle, then the result expectation is just as the one
     \right.
 \]
 
-Combine expression \eqref{ExpectSleep} and \eqref{Eftts}, the expectation of freshness latency is defined in the problem of hibernate involved crawling.
+Combine expression \eqref{ExpectSleep} and \eqref{Eftts}, the expectation of latency of periodic sleep sensors can be computed.
 
 \end{document}

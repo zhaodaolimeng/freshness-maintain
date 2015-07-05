@@ -68,10 +68,13 @@
 % use a multiple column layout for up to three different
 % affiliations
 \author{
-\IEEEauthorblockN{Li Meng\IEEEauthorrefmark{1}\IEEEauthorrefmark{2}, Cui Li\IEEEauthorrefmark{1}}
+\IEEEauthorblockN{
+	Li Meng\IEEEauthorrefmark{1}\IEEEauthorrefmark{2}, 
+	Haiming Chen\IEEEauthorrefmark{1}, 
+	Cui Li\IEEEauthorrefmark{1}}
 \IEEEauthorblockA{\IEEEauthorrefmark{1}Institute of Computing Technology, Chinese Academy of Sciences}
-\IEEEauthorblockA{\IEEEauthorrefmark{2}Graduate University of the Chinese Academy of Sciences, China}
-\IEEEauthorblockA{\{limeng, lcui\}@ict.ac.cn}
+\IEEEauthorblockA{\IEEEauthorrefmark{2}University of Chinese Academy of Sciences, China}
+\IEEEauthorblockA{\{limeng, chenhaiming, lcui\}@ict.ac.cn}
 }
 
 % make the title area
@@ -79,48 +82,61 @@
 
 
 \begin{abstract}
-%\boldmath
-The search of IoT(Internet of things) is an important way for people to exploit useful sensors. In this paper, we study the problem of crawling the content of low power IoT sensors, which is a fundamental step towards building a generic IoT search engine.
-The crawl of IoT sensors is very different from that of Web. In IoT applications, many low-power sensors may sleep periodically, causing invalid crawls and unpredictable latency. Also, in IoT systems, the energy consumption of crawl access becomes non-negligible.
-With these sensors widely used in IoT systems, traditional crawling schedule strategy is not suitable.
-In this paper, a new sleep-aware schedule method, EasiCrawl, is proposed to solve the scheduling problem of crawling periodically sleep IoT sensors. We first formulated this as a constraint optimization problem, using the expectation of latency to measure the realtime performance. With this formalization, we developed an iteratively improving method, which can get the near optimal latency expectation. 
-At last, EasiCrawl is evaluated with simulations. A case study is also performed with real world data from xively.com, showing that EasiCrawl is more suitable for IoT search than traditional Web-based search scheduling.
+Search of the Internet of things is an important way for people to exploit useful sensors. Crawling the content of low power IoT sensors is a fundamental step towards building a generic IoT search engine.
+However, the crawl of IoT sensors is very different from that of Web. In IoT systems, many low-power sensors may sleep periodically, which results in invalid crawls and unpredictable latency. Besides, the energy consumption of crawl access becomes non-negligible.
+As a consequence, the traditional crawling schedule strategy is not suitable for IoT search engine.
+We first formulated this periodically sleeping sensors, as a constrained schedule optimization problem, with the objective of minimized latency to crawl information from sensors. 
+Then, we developed an a heuristic schedule, named EasiCrawl to get the near optimal expected latency. 
+At last, EasiCrawl is evaluated with simulations which show advantages over other greedy-based methods.
+A case study is also performed with real world data from Xively, showing that EasiCrawl has lower crawling latency and energy consumption than traditional Web-based search scheduling.
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-% why IoT search is important
-Searching of IoT(Internet of Things) is a basic step for users and applications to find different kinds of sensors and IoT sensors. 
-A generic IoT search engine can be used in variety scenes, which can improve the possibility of sharing sensors with others, which can significantly reduce the redundancy of sensor deploying. Also, different applications composition method like IFTTT\cite{ifttt} can be easily implied with the help of IoT search engine.
+A large number of sensors have been deployed and connected to the Internet to collect physical information, which is provided for the human society to sense and control the physical space in an intelligent way. 
+The extended Internet with sensors are known as the Internet of Things (IoT). 
+With booming number of sensors in IoT, it is inevitable to develop a generic search engine for users and applications to find different kinds of IoT sensors. 
+So, it can be expected that a generic IoT search engine can be used in variety scenes to improve the possibility of sharing sensors with others.
+In such a way, search of IoT can significantly reduce the redundancy of sensor deployment and facilitate construction of different IoT applications using method like IFTTT\cite{ifttt}.
+% ============== More approperate examples needed
 More specifically, in smart city applications, public sensors can be found in an ad hoc manner to provide predicates as traffic jam and queuing status. 
 Smart home applications need searchable sensors and devices to detect human activities and provide human-centric sensing, which calls for a realtime sensor discovery mechanism. In recent future, unmanned systems like automatic driving systems and quad-copter delivery systems are likely to be heavily dependent on information gathered from nearby sensors or other IoT sensors, which also needs IoT search. 
-
-% why our problem is important
-However, even with the help of standardized protocols and semantic descriptions of sensors, the design of IoT search engine is not a trivial task. The main problem lay in the internal instinct of IoT. Firstly, IoT sensors is not connected by their content, which is precisely what user cares, link-based crawl method is infeasible for IoT search engine. Secondly, IoT sensors, whose content can be highly dynamic, behaves differently from Web page, many of them may enter sleep mode periodically, meanwhile the realtime performance of search is a critical measurement. In this paper, we propose EasiCrawl, which is devoted to solve the sleep-aware IoT crawl scheduling problem.
+% ==============
 
 % practicability - the pull-based iot search system
-The built of a generic IoT search engine is technically practical with researches using semantics\cite{Pfisterer2011}. 
-The conception ``description" is an abstraction of the state of a sensor, which means descriptions crawled by IoT search engines include not only static contents, but also dynamic records generated by the sensor itself. 
+The IoT search engine is technically realizable with the help of standardized protocols and semantic descriptions of sensors\cite{Pfisterer2011}. 
+Specifically speaking, state of a sensor is described by a dynamic description method.
+The dynamic descriptions crawled by IoT search engines include not only static contents, but also dynamic records generated by the sensor. 
 Indeed, many research group are working on dynamic describing methods, such as CoRE\cite{CoREWorkingGroup2012} from IETF and SensorML\cite{botts2007opengis} from OGC. 
+
+
+% why our problem is important
+However, even with dynamic description, the design of IoT search engine is not a trivial task. The main challenge is induced from the instinctive characteristics of IoT. 
+Firstly, IoT sensors is not hyper-linked by their content, so link-based crawl method is infeasible for IoT search engine. 
+Secondly, contents of IoT sensors are usually highly dynamically generated.
+Third and most importantly, IoT sensors behaves differently may enter sleep mode periodically, whereas timely response is a critical performance of search. In this paper, we aim to accelerate IoT search by taking the third characteristic into considerations.
+
+
 \begin{figure}
 	\centering
 	\includestandalone[width=\linewidth]{pic/architecture}
 	\captionsetup{justification=centering}
-	\caption{Architecture of Pull-based IoT Search System}
+	\caption{Architecture of IoT Search System}
 	\label{fig:architecture}
 \end{figure}
 
 
-We are building an IoT search system. Consider about the stability and standardization advantages, we use the pull-based architecture as the basic framework to study IoT crawl scheduling problem. 
-The architecture of this pull-based IoT search system is illustrated by Fig.\ref{fig:architecture}. 
-In a pull-based IoT search system, we treat sensors as Web pages, which can automatically update their description files. We suppose every sensors in this system supports IP protocol. 
+Fig.\ref{fig:architecture} gives the architecture of an IoT search system.
+In this search system, we supposes every sensors supports IP protocol.
+It treat sensors as Web pages, where sensors can automatically update their description files.
 IoT crawlers crawl different sensors for these descriptions files, and copy these into a local copy at server end, called repository. The repository is an organized storage, with whom the user queries about IoT sensors can be accomplished.
+%====== On my own now
 We assume the user only interest in the events monitored by corresponded sensors, which arrives periodically or just randomly. With the help of semantic IoT method, IoT sensors capture the event stream, and continuously store these events, and update their description files correspondingly. In this manner, the description file reveal the realtime state of sensors. IoT search engine regularly access the IoT descriptions, then updates the related repository. CoAP with CoRE resource description method can be used as standardized protocol for sensors and devices, and the description messages are listed in the ./well-know file used in the CoRE framework. 
 
 
 % challenge of EasiCrawl
-However, the sleep behavior of sensors and possible energy constraints makes it critical to choose crawling frequency and strategies for IoT crawlers.
+The sleep behavior of sensors and possible energy constraints makes it critical to choose crawling frequency and strategies for IoT crawlers.
 EasiCrawl is an appropriate strategy which takes the above requirements into consideration.
 It's a scheduling strategy implemented at the server side as a role of IoT Crawl Scheduler. Our design principle is to minimize the information latency during  a period while meet the energy constraint of IoT sensors, given sensor sleeping schedule and the frequency of event. Here we clarify that, if a sensor is sleeping, we indicate that all its communication and event detection function are disabled.
 The insight of the solution lies in the convexity of the function between crawl times and latency for a single sensor. If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: (1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? (2) What's the best scheduling strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiCrawl is implemented in a iterative way based on these analyze. For each steps, EasiCrawl compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.

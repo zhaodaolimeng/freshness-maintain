@@ -1,0 +1,214 @@
+\documentclass{standalone}
+\usepackage{tikz,pgfplots}
+
+\begin{document}
+	\pgfplotstableread{
+		timestamp   temperature
+		1	25.6
+		2	25.6
+		3	25.6
+		4	25.6
+		5	25.5
+		6	25.6
+		7	25.5
+		8	25.5
+		9	25.5
+		10	25.5
+		11	25.4
+		12	25.4
+		13	25.4
+		14	25.4
+		15	25.4
+		16	25.3
+		17	25.3
+		18	25.3
+	}{\segtableone}
+	
+	\pgfplotstableread{
+		timestamp   temperature
+		37	25.2
+		38	25.2
+		39	25.2
+		40	25.1
+		41	25.1
+		42	25.1
+		43	25.1
+		44	25.1
+		45	25.2
+		46	25.2
+		47	25.2
+		48	25.3
+		49	25.4
+		50	25.5
+		51	25.5
+		52	25.6
+		53	25.6
+		54	25.7
+		55	25.7
+		56	25.7
+		57	25.8
+		58	25.8
+		59	25.9
+		60	25.9
+		61	25.9
+		62	26
+		63	26.1
+		64	26.2
+		65	26.3
+		66	26.3
+	}{\segtabletwo}
+	
+	\pgfplotstableread{
+		timestamp   temperature
+		85	26.1
+		86	26.1
+		87	26
+		88	26
+		89	25.9
+		90	25.8
+		91	25.8
+		92	25.8
+		93	25.7
+		94	25.8
+		95	25.7
+		96	25.8
+		97	25.9
+		98	25.9
+		99	25.9
+		100	25.9
+		101	25.9
+		102	25.8
+		103	25.8
+		104	25.8
+		105	25.8
+		106	25.8
+		107	25.8
+		108	25.8
+		109	25.8
+		110	25.8
+		111	25.9
+		112	25.8
+		113	25.8
+		114	25.7
+	}{\segtablethree}
+	
+	\pgfplotstableread{
+		timestamp   temperature
+		133	25.4
+		134	25.3
+		135	25.3
+		136	25.3
+		137	25.3
+		138	25.2
+		139	25.2
+		140	25.2
+		141	25.2
+		142	25.2
+		143	25.2
+		144	25.3
+		145	25.4
+		146	25.6
+		147	25.5
+		148	25.5
+		149	25.6
+		150	25.7
+		151	25.7
+		152	25.8
+		153	25.8
+		154	25.9
+		155	25.9
+		156	25.9
+		157	26
+		158	26
+		159	26
+		160	26
+		161	26
+		162	25.9
+	}{\segtablefour}
+	
+	\pgfplotstableread{
+		timestamp   temperature
+		181	25.5
+		182	25.4
+		183	25.4
+		184	25.3
+		185	25.2
+		186	25.2
+		187	25.2
+		188	25.1
+		189	25.1
+		190	25.1
+		191	25.1
+		192	25
+		193	25
+		194	25.1
+		195	25.1
+		196	25.2
+		197	25.2
+		198	25.2
+		199	25.2
+		200	25.3
+		201	25.4
+		202	25.4
+		203	25.4
+		204	25.4
+		205	25.4
+		206	25.4
+		207	25.4
+		208	25.4
+		209	25.4
+		210	25.3
+	}{\segtablefive}
+	
+	\pgfplotstableread{
+		timestamp   temperature
+		229	24.6
+		230	24.6
+		231	24.6
+		232	24.5
+		233	24.5
+		234	24.5
+		235	24.4
+		236	24.4
+		237	24.4
+		238	24.4
+		239	24.5
+		240	24.5
+	}{\segtablesix}
+	
+	\pgfplotstableread{
+		time	value
+		30	25.3
+		60	25.9
+		90	25.8
+		120	25.5
+		150	25.5
+		180	25.4
+		240	24.5
+	}{\linetable}
+	
+	\begin{tikzpicture}[scale=1]
+	\begin{axis}[
+	width=0.8\textwidth,
+	height=0.3\textwidth,
+	xmin=0, % xmax=240,
+	xlabel=Time (30 min),
+	ylabel=Temperature ($^{\circ}$C)]
+	
+	\addplot [scatter] table [x={timestamp}, y={temperature}] {\segtableone};
+	\addplot [scatter] table [x={timestamp}, y={temperature}] {\segtabletwo};
+	\addplot [scatter] table [x={timestamp}, y={temperature}] {\segtablethree};
+	\addplot [scatter] table [x={timestamp}, y={temperature}] {\segtablefour};
+	\addplot [scatter] table [x={timestamp}, y={temperature}] {\segtablefive};
+	\addplot [scatter] table [x={timestamp}, y={temperature}] {\segtablesix};
+	
+	\addplot [only marks,mark=x,color=green,mark options={scale=4,very thick}] 
+		table [x={time},y={value}] {\linetable};
+	
+	\draw [stealth-, thick] (axis cs:32,25.2) -- (axis cs:60,24.6) node [below] {Invalid crawl};
+	\draw [stealth-, thick] (axis cs:120,25.4) -- (axis cs:60,24.6);
+	\draw [stealth-, thick] (axis cs:180,25.6) -- (axis cs:185,26.0) node [above] {Bad schedule};
+		
+	\end{axis}
+	\end{tikzpicture}
+\end{document}

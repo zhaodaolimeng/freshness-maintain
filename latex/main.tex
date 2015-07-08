@@ -116,7 +116,7 @@ It treat sensors as Web pages, where sensors can automatically update their desc
 IoT crawlers crawl different sensors for these descriptions files, and copy these into a local copy at server end, called repository. The repository is an organized storage, with whom the user queries about IoT sensors can be accomplished.
 We assume the user only interest in the events monitored by corresponded sensors, which arrives periodically or just randomly. 
 With the help of semantic IoT method, IoT sensors capture the event stream, and continuously store these events, and update their description files, which correspondingly record the state of sensors. 
-IoT search engine regularly accesses the IoT descriptions and updates the related repository.
+IoT search engine regularly accesses these IoT descriptions and updates the related repositories. Then, users' query can be responded with the fresh information.
 
 \begin{figure}
 	\vspace{0.5em}
@@ -134,13 +134,14 @@ However, even with dynamic description, the design of IoT search engine is not a
 Firstly and the most importantly, IoT sensors behaves differently in sleep mode, whereas timely response is a critical performance of search. If a sensor is sleeping, it can neither capture events nor be visited by IoT crawlers. If information are not collected in a right timing, the realtime quality of IoT search will be impacted significantly.
 Secondly, most of IoT sensors are low-power device, where the energy consumption is a critical factor. A unnecessary high frequency of visiting a sensor may quickly exhaust battery energy.
 Thirdly, IoT sensors is not hyper-linked by their content, so link-based crawl method is infeasible for IoT search engine. 
-In this paper, we aim to accelerate IoT search by taking the second and third characteristic into considerations.
-Fig.\ref{fig:smarthome} is a clip of data stream from a temperature sensor located in a smart home environment, who acts as a sensor for air-conditioner control. 
+We use a clip of real world data to illustrate how the instinct of sensors' sleeping impact the crawl quality of IoT search system.
+Fig.\ref{fig:smarthome} is a data stream from a temperature sensor located in a smart home environment, who acts as a sensor for air-conditioner control. 
 If the value are varying too quickly or the value is out of safe boundary, then the event is logged as an \textbf{interesting event} into the description file.
 When users are not at home, these sensors will go into sleep mode. 
 We marked all these interesting events out in the figure.
-The traditional crawl scheduling method perform badly in this case, because lacking awareness of sensors' sleep. Traditional scheduler will crawl sensor description files periodically, causing invalid access to sleeping sensors (like what is showed at time 30 in Fig.\ref{fig:smarthome}) and delay across the whole sensor' sleeping cycle(at time 210). 
-Meanwhile, EasiCrawl can schedule the crawling process with a guarantee of low latency while taking sensors' sleep into consideration.
+The traditional crawl scheduling method perform badly in this case, because lacking awareness of sensors' sleep. Traditional scheduler will crawl sensor description files periodically, causing invalid access to sleeping sensors, like what is showed at time 30 in Fig.\ref{fig:smarthome}. Bad crawl time cause by delay across the whole sensor' sleeping cycle, at time 210, may also significantly increase latency. 
+In this paper, we aim to accelerate IoT search by taking the second and third characteristic of sensors into considerations.
+We propose a new server-side scheduling method, EasiCrawl, which can schedule the crawling process with a guarantee of low latency when taking sensors' sleep pattern into consideration.
 
 \begin{figure}
 	\centering
@@ -186,59 +187,62 @@ These two problem make IoT crawler's strategy very different from crawlers in a 
 
 \section{Formulation}\label{formulation}
 
-In this section, we introduce the formulation of crawl schedule problem, along with the symbols used in the following paper. The follow assumptions are set to simplify sensors' working model.
+In this section, we introduce the formulation of crawl schedule problem, along with all the symbols used in the following paper. The follow assumptions are set to simplify sensors' working model.
 (1) Events that users care arrived at each IoT sensor in a Poisson manner, where the time interval between any two event follows exponential distribution. 
-(2) In the sensors are in sleep mode, they can be accessed by crawlers, but no new events can be captured.
+(2) When sensors are in sleep mode, they can not be accessed by crawlers, and no new events can be captured or stored.
 (3) User only cares about the event latency, which is the object function for optimization.
 (4) Sensor cannot be accessed too frequently.
-(5) During time range $T$, the server has a limited crawl time.
+(5) During time range $T$, the server has a limited chances to crawl.
 
-EasiCrawl is periodically work schedule strategy, which is called in a cycle whose length is $T$. We call $T$ as the time range of EasiCrawl in the following paper.
-Suppose there are totally $N$ sensors needs to be re-crawled, while crawler can perform at most $M$ times of crawls during the period $[0, T]$. Our goal is to find a schedule strategy $\phi$, so the latency expectation of all $N$ IoT sensors is minimized. 
-For the model simplicity, a discretization method is implied. We set up a discrete time table $\mathbf{T}$ with a discretization step of $\epsilon$, where each crawl must preformed at the time point in the time table.
-Crawl schedule $\phi_{i,j}\in\{0,1\}$, and $\phi_{i,j}=1$ means sensor $i$ will be crawled at time $j$, where time $j\in\mathbf{T}$.
-The total access count of all $N$ sensors during $[0, T]$ can be represented as $\Arrowvert\phi\Arrowvert_{1}$. For each sensor $i$, the total crawl time is marked as $\sum_{i=1}^{N}\phi_{i,k}$. 
-Considering the difference between sensors, we define $\omega_i$ as the expectation weight of sensor $i$. The latency expectation, which is the final object function, can be evaluated as $\Arrowvert \omega_i E(\phi) \Arrowvert_{1}$, where $\omega_i$ is the weight parameter for the latency of sensor $i$.
+EasiCrawl is invoked periodically and then compute a schedule plan for the next $T$ time length.
+We also call $T$ the \textbf{time range} of EasiCrawl in the following paper.
+Suppose there are totally $N$ sensors that need to be continuously crawled.
+For the model simplicity, a discretization method is implied, and finite numbers of time points can be used for crawl.
+We set up a discrete time table $\mathbf{T}$ with a step length $\epsilon$, where each crawl must be preformed at some time point in the time table.
+Symbol $\phi$ stands for the \textbf{schedule plan}, and our goal is to find a property $\phi$ so that the latency expectation of all $N$ IoT sensors is minimized. 
+The schedule plan $\phi$ consists of two part. The first part is the arrangement of \textbf{number of crawls} each sensor $i$, written as $n_1,n_2,\ldots,n_{N}$. The second part is the specific crawl plan for each sensors, which is a list of time points for crawling. We denote this list as $\phi_{i}$ for convenience.
+In order to model the sleep pattern of each sensor, we use a list of time slots to represent the working duty cycle of sensors, which is called \textbf{sleep plan} for brief. 
+The discretization process takes the sleep plan of each sensor as input, and generate discretized time points for each sensor, where time points when sensor are sleeping are not included.
+Sometimes the importance of sensors are different, so we define a factor $\omega_i$ as the expectation weight of sensor $i$. 
+Here we use the notation $E_{L}(n_{i})$ as the minimal \textbf{latency expectation} that can be gained by sensor $i$ with totally $n_i$ chance to crawl.
+The final object function is the sum of latency expectation of all sensors which is evaluated as $\Arrowvert \omega_i E_{L}(n_{i}) \Arrowvert_{1}$.
 
-In addition, this problem must follow several constraints. Server load and IoT sensors' energy consumption are two main limitations. 
-These constraints can be formalized directly: during any period $[0, T]$, the access time $C_i$ for sensor $i$ is limited to be accessed less than $\gamma_i$ times. For the server load, our settings are similar to the formal research\cite{Wolf2002}, where the crawlers from the server can not commit more that $\theta$ crawls during time period$[0, T]$.
+In addition, this problem follows two constraints. As previously described, server load and IoT sensors' energy consumption are considered. 
+During the time range $T$, the access time $n_i$ for sensor $i$ is limited to be accessed less than $\gamma_i$ times. 
+For the server-side, we use a similar as the optimal schedule\cite{Wolf2002}, where the crawlers from the server can at most commit $\theta$ crawls during the time range $T$. This models the largest bandwidth of server-side.
 With the object function and constraints, we arrived at the following formulation:
 \begin{eqnarray}
 \begin{array}{ll}
-\min_{\phi}&\Arrowvert \omega_i E(\phi) \Arrowvert_{1}\\
+\min_{\phi}&\Arrowvert \omega_i E_{L}(n_{i}) \Arrowvert_{1}\\
 \text{s.t.}
 &\Arrowvert \phi \Arrowvert_{1}\leq\theta\\
-&\sum_{\forall t \in \mathbf{T}}{\phi_{i,t}}\leq\gamma_i\\
+&n_i\leq\gamma_i\\
 &i=1,\ldots,N
 \end{array}\label{OBJ}
 \end{eqnarray}
 
-Problem \eqref{OBJ} is a generalized formulation, which does not content specific sensor model and sleep behavior of IoT sensors. Due to different requirements between IoT applications, it's not rational to use an universal model to formalize the sleep pattern. For many sensors, the sleep pattern is unknown, while others may have been per-arranged.  In the follow section, different working model of sensor is discussed. 
+Problem \eqref{OBJ} is a generalized formulation, which does not require for specific sensor model or sleep plan. Due to different requirements between IoT applications, it's not rational to use an universal model to formalize the sleep pattern. For many sensors, the sleep pattern is unknown, while others may have been per-arranged.  
+In the follow section, different working model of sensor is discussed. 
+
 
 \section{Crawling IoT Sensors with EasiCrawl} \label{easicrawl}
 
-We first give out our method to iteratively improve our solution, in order to achieve the optimal scheduling strategy, then introduce technical details of these subroutines, including the schedule method for periodic or none-periodic sleep sensors. At last, we discuss the strategy for sensors whose sleep plan is previously unknown.
+We first give out method framework of EasiCrawl, which iteratively improve our solution to achieve a latency optimal scheduling plan. 
+Then technical details of subroutines of EasiCrawl is introduced, including the schedule method for periodic or none-periodic sleep sensors. At last, we discuss the strategy for sensors whose sleep plan is previously unknown.
 
 \subsection{Method Framework}
-The main idea of EasiCrawl is to distribute crawl chances to sensors according to their performance in reduction of latency expectation.
-EasiCrawl use an iterative method to improve the final schedule plan step by step. 
-In each iteration, it compute the optimal or near optimal schedule according to the sensor's future sleep plan, and try to redistribute the arrangement for a better global latency expectation.
-
-
-% Moved from Introduction
-If convexity of the object function holds, the minimization problem can be solved by the follow two sub problems: 
-(1) How to decrease the object function by rearranging crawl times for each sensors during a fix length of time? 
-(2) What's the best scheduling strategy for each sensor? Luckily, the convexity can proof with some constraints. EasiCrawl is implemented in a iterative way based on these analyze. For each steps, EasiCrawl compute the minimum sum of latency that can achieved by the current crawler arrangement, and then rearrange to see if the result can be improved.
-
-Suppose the latency expectation of sensor $i$ is $E_L^{i}(n)$, given the number of crawls $n_i$.
-The object function of formulation \ref{OBJ} can be rewrite as $\sum_{i=1}^{N} \omega_i E_L^{i}(n_i)$. The total crawl time constraint can be taken as $\sum_{i=1}^{N} n_i < M$ and the energy constraint of single sensor can be rewrite as $n_i<\gamma_i$.
+The main idea of EasiCrawl is to arrange crawl chances $n_1,n_2,\ldots,n_N$ to the sensors according to their performance in reduction of latency expectation. This arrangement is done in an iterative manner.
+Firstly, an original arrangement is made in proportion to an estimated latency, which is the sensors' importance $\omega$ multiple the length of working time.
+Then EasiCrawl started to use an iterative method to improve the object function $\Arrowvert E_{L}^{i}(n_{i})\Arrowvert_{1}$ step by step. 
+In each iteration, EasiCrawl searches for a best change in arrangements which can deduce the latency expectation most quickly.
+With these analysis, the minimization problem can be transformed into the following two sub-problems.
+First, how to rearranging crawl numbers for each sensor under two constraints? Second, what's the best scheduling strategy for each sensor? 
 Once crawl times $n_i$ is chosen, the optimal crawl strategy for a single sensor is determined. Here, every function of $E_L(n)$ is non-decreasing. 
-To iteratively improve the global result, we design an approach which is similar to SMO\cite{Platt1998}. 
+To iteratively improve the global result, we use an approach to change a pair of $n$ at the same time.
 First we dispatch the $M$ crawl time to $N$ sensors according to $\omega_i$. Then we start to search sensors for a pair $i$, $j$, where $i$, $j$ are both arrangements. If $i\gets i-1$ and $j\gets j+1$ will cause a largest improvement to the object function compared to the other pairs, then changes of $i$ and $j$ are conformed. This process will be continued until none improvement can be made. 
 The above is the main idea of EasiCrawl.
 
-
-In addition, the feasibility of this method is based on a preliminary that $E_L(n)$ are convex. 
+The rightness of this method is based on a preliminary that $E_L(n)$ are convex. 
 To proof this, since crawl times $n$ is an discrete value, we can just illustrated the latency decrease of adding a new crawl to a sensor is less than that of the previous addition.
 Here we assume the latency expectation function $E_h[G(t)]$ is convex, which is proofed in the appendix. It's easy to show the convexity of $E_L(n)$ if the $t$ is continuous, where the convexity of $E_L(n) = n E_h[G(t/n)]$ can be proofed by the convex preserve operations. However, the time nodes $t$ used in the follow method is discretized, and the sleep plan of sensors are actually not continuous. In this sense, the convexity of $E_L(n)$ are verified in the evaluation section by simulation, where the result is quite supportive.
 

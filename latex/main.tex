@@ -274,33 +274,43 @@ In step 1, method $EvenlyDivide$ initialize the crawl arrangements $\hat{n}$.
 Schedule plan $\Phi$ is iteratively improved during steps 2 to 11. 
 EasiCrawl search for the best change from Step 3 to 10, and then replaced $\Phi$ with a better one.
 
-The rightness of this method is based on a preliminary that $E_L(n)$ are convex. 
-To proof this, since crawl times $n$ is an discrete value, we can just illustrated the latency decrease of adding a new crawl to a sensor is less than that of the previous addition.
-Here we assume the latency expectation function $E_h[G(t)]$ is convex, which is proofed in the appendix. It's easy to show the convexity of $E_L(n)$ if the $t$ is continuous, where the convexity of $E_L(n) = n E_h[G(t/n)]$ can be proofed by the convex preserve operations. However, the time nodes $t$ used in the follow method is discretized, and the sleep plan of sensors are actually not continuous. In this sense, the convexity of $E_L(n)$ are verified in the evaluation section by simulation, where the result is quite supportive.
+Here, we explain why this method can lead to optimal schedule plan.
+Indeed, the correctness of EasiCrawl is based on a fact that the latency expectation function for each sensor $E_L(n)$ are convex. 
+Then the convexity of the object function $E_L(\Phi(\hat{n}))$ can be proved, which is the sum of $E_L(n_i)$ for each sensor $i$.
+Notice that the constrains of are convex, \textbf{problem \eqref{OBJ} is indeed a convex optimization problem}, in which iterative method always points to a optimal solution.
+The next step is to prove the convexity of $E_L(n)$.
+More specification of sensor's sleep plan is needed for this proof.
+First, we use $E_f(t_s,t)$ to represent the latency expectation of a time period, where $t_s$ and $t$ are the start time and end time. If the crawl plan are located at $t_1,t_2,...,t_n$, then latency expectation of a single sensor can be rewrote as $E_L(n) = \sum_{i=1}^{n-1}E_f(t_{i},t_{i+1})$. We use $E[G(t)]$ as an alias for $E_f(t_s,t)$ for simplify.
+The convex of latency expectation $E_h[G(t)]$ is proved in the appendix. 
+Time periods $[t_i,t_i+1]$ shares a same expectation function $E[G(t)]$. 
+The convexity of $E_L(n) = n E_h[G(t/n)]$ can be proofed by the convex preserve operations. 
+In this way the convexity of $E_L(n)$ can be proved.
+Our result in simulation section also shows a supportive result for these analysis.
+In addition, the computation of $E_h[G(t)]$ and $E_f(t_s,t)$, which are both latency expectation of a single senor, is discussed in the appendix.
 
-Notice method \ref{alg:framework} has not set any specified requirements for the sensors sleep behavior.
-However, the latency expectation $E_L(n_i)$ of a single sensor $i$ is closely related to sensors sleep plan.
-In the following paper, sensors are classified into 3 types according to their sleep behavior.
-To solve the schedule problem for a single sensor, we proposed a dynamic programming method for the optimal scheduling, but find the time complexity is somewhat unacceptable. 
-So, a greedy method is designed as a trade-off for time efficiency. 
-We also discuss the situation when the sensors' sleep plan is unknown in the following part.
+In the following paper, we first designed a dynamic programming method to compute the crawl plan for non-periodic sleeping sensors. 
+This method can return the optimal solution, but the time complexity is somewhat unacceptable for large datasets.
+So, we proposed a greedy method as a trade-off for time efficiency. 
+All these two methods are used to compute the crawl plan $\phi$ of a single sensor with sleep behavior.
 
-\subsection{If Sleep Plan is Unknown}
-To our best knowledge, for the unknown sleep pattern case, if there are no previous knowledge for the sleep behavior, the detection and scheduling can be formed as an multi-armed bandit problem, which is known to be NP-hard. If there are no latent pattern for sleep behavior, then there will be not optimal strategy expect for periodically sensor querying, which is definitely an inefficiency schedule method. In EasiCrawl, we implement a crawl strategy which try to crawl the sensors as evenly as possible.
+\subsection{Dynamic Programming Method for Optimal Crawl Plan}
 
+In a real world IoT system, sensors' sleep plan make them difficult to crawl in a fix interval. 
+Actually, the best crawl plan may be very different from a periodic crawl, especially when the sleep plan is not periodic.
+With the previous discretization process, we have a chance to enumerate all the possible crawl plans. The following dynamic programming(DP) method take an advantage of memorized search, which cached the sub-problem to accelerate the enumeration process.
 
-\subsection{Sleep Plan Known, But Non-periodic}
-In a real world IoT system, sleep plan of sensors are likely to be non-periodic. Also the crawling interval maybe much larger than $T_h$. 
-If the length of working cycles are neglected and represented as time points, then problem of searching optimal crawling can be transformed to a search problem, which can be solved by dynamic programming.
-
-
-Here a directed acyclic graph(DAG) model $G(E,V)$ is used to formalize the non-periodic hibernate problem.
+We use \textbf{timeline} to refer the discretized time table for a single sensor, which consist of the working cycle and the sleeping cycle.
+The crawl plan can actually be formed as a route planning problem given the following transformation.
+Here a directed acyclic graph(DAG) model $G(E,V)$ is used to formalize this problem.
 $E$ are the edges of the graph, and $V$ are the vertex. We suppose there are $m$ vertex. 
-If there are $T'$ time points in the timeline which stand for the non-periodic working cycle. Corresponding, there are exactly $T'$ vertex in this graph, from number $1$ to number $T$. 
+There are $T$ time points in the timeline which stand for the working cycle. 
+Corresponding, there are exactly $T$ vertex in this graph, from number $1$ to number $T$. 
 We define $n$ as the count of crawls used, which indicates there are $n-1$ vertex allowed to pass, because the last vertex must be chosen. 
-Now we take every points which stand for the working cycle as graph vertex, written as $v_i$. We defined that, for each pair of time points $t_i$ and $t_j$, if $t_i<t_j$, a directed edge $e_{i,j}$ from $v_i$ to $v_j$ is added to the graph, where $t_i$ and $t_j$ are all . A weight value $w_{ij}$ is set to $e_{i,j}$, whose value is $E_f(t_j, t_i)$, the expectation gain of a crawl at time $t_j$ whose previous crawl is at $t_i$.
-Our problem is, how to find a path $e_{1,i},\ldots,e_{j,T}$ from $v_1$ to $v_m$, which take exactly $n$ steps, that minimum the sum of all the weights along. This transform process can be illustrated by Fig. \ref{fig:problemtrans}.
-
+Now we take every points which stand for the working cycle as graph vertex, written as $v_i$. 
+For each pair of time points $t_i$ and $t_j$, if $t_i<t_j$, a directed edge $e_{i,j}$ from $v_i$ to $v_j$ is added to the graph. 
+A weight value $w_{ij}$ is set to $e_{i,j}$, whose value is $E_f(t_j, t_i)$, is the latency expectation gain of a crawl at time $t_j$ whose previous crawl is at $t_i$.
+Our problem is, how to find a path $e_{1,i},\ldots,e_{j,T}$ from $v_1$ to $v_m$, which take exactly $n$ steps, that minimum the sum of all the weights alongside. 
+This transform process can be illustrated by Fig.\ref{fig:problemtrans}.
 \begin{figure}
 	\centering
 	\includestandalone[width=\linewidth]{pic/problemtrans}
@@ -309,9 +319,10 @@ Our problem is, how to find a path $e_{1,i},\ldots,e_{j,T}$ from $v_1$ to $v_m$,
 	\label{fig:problemtrans}
 \end{figure}
 
-
-With an acceptable scale of time range $T$ and crawl time $n$, this problem can be solved by dynamic programming. The solution state with a vertex $v_i$ and the available crawl time $n'$ left can be used as an sub-problem. Noticing the optimal expectation can be computed by adding weight $w_{i,j}$ with all the expectation known in sub-problems. The recursive relationship is summarized as follows:
-
+With an acceptable scale of time range $T$ and crawl time $n$, this problem can be solved by DP method \ref{alg:dp_min}. 
+Solution state with a vertex $v_i$ and the available crawl time $n'$ left can be used as an sub-problem. 
+The optimal expectation can be computed by adding weight $w_{i,j}$ with all the expectation known in sub-problems. 
+The recursive relationship can be summarized with expression \eqref{dp}.
 \[f(v_i, n')=\left\{
 \begin{array}{lr}
 \min_{k=1}^{i-1}\{f(v_{i-k}, n'-1)+w_{i,i-k}\}\\
@@ -322,9 +333,7 @@ With an acceptable scale of time range $T$ and crawl time $n$, this problem can 
 \right.
 \]
 
-
-$f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v_i$, with cost exactly $n$ steps. In each step, we go over the  The computation complexity of iterating process is $O(T^2n)$, in which $nT$ sub-problem are computed and each computation will cost $n$ operations. The backtrack method uses $p(v_i, n)$ to get the optimal strategy, which takes at most $n$ steps. As a result, the overall complexity is still $O(T^2n)$ 
-
+$f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v_i$, with cost exactly $n$ steps. In each step, we go over the  The computation complexity of iterating process is $O(T^2n)$, in which $nT$ sub-problem are computed and each computation will cost $n$ operations. The backtrack method uses $p(v_i, n)$ to get the optimal strategy, which takes at most $n$ steps. As a result, the overall time complexity is still $O(T^2n)$.
 \begin{algorithm}
 	\caption{DP Method for Crawling Non-periodic Sensors}
 	\label{alg:dp_min}
@@ -346,17 +355,21 @@ $f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v
 	\end{algorithmic}
 \end{algorithm}
 
+\subsection{Greedy Method for Periodic Sleep Sensors}
 
-\subsection{Periodic Sleep Sensors}
-
-Previous introduced method is a generic method for any sensor whose sleep plan is known. Although it's proven a optimal solution, the computation complexity is relatively high.
-So next, we introduce a crawling strategy for single sensor under the situation that sensors' sleep plan is periodic.
-In the following paper, we first focused on the problem of scheduling crawls for non-sleep sensors, which has a direct connection with the periodic sleep case.
-In the situation when IoT sensors continuously work, an intuition is to evenly distributed the crawling action across the crawling schedule. Here a proof of this proposition is given.
+Previous DP method is a generic way to compute the accuracy crawl plan. 
+Although it's proven a optimal solution, the computation complexity is relatively high.
+Most of the time, there is no need to compute a optimal plan, especially when the computation resource is intensive.
+So next, we introduce a greedy crawl planning method.
+This method gives a optimal solution when the sensors are none-sleeping. 
+It's also a perfect approximate in the other situations.
+We start from the continuously working situation. 
+An intuition is to evenly distributed the crawling action across the crawling schedule. 
+We prove this method actually leads to an optimal value.
 
 \begin{lemma}
 \label{evenly}
-In a continuous situation where no sensor hibernates, the optimal strategy is to scatter the crawl action over the timeline $t\in [0, T]$ as evenly as possible, where $T$ is a constant.
+The optimal crawl plan of an continuously working sensor is to scatter the crawl action over the timeline $t\in [0, T]$ as evenly as possible, where $T$ is a constant.
 \end{lemma}
 \begin{IEEEproof}
 The evenly crawl proposition here can be proved by the convexity of $E_h[G(t)]$ \cite{boyd2004convex}. Here we donate $E_h[G(t)]$ as $f(t)$ for convenience. 
@@ -365,7 +378,6 @@ As a result, the whole expectation gain during $[0,T]$, which is marked as $F(0,
 This conclusion can be generalized to a normal situation where multiply crawling are committed with the following induction. 
 Now suppose there are $n$ crawling action, among which first $n-1$ action evenly divide the timeline. The time length of $n$-th crawling action does not equal to the adjacent one's, and we claimed this strategy is optimal. For any adjacent pair divided by a single crawling action, if the division is not evenly, we can choose the evenly one as a new strategy, which can lead to a larger $f(t)$ according to the proposition above, which is a contradiction.
 \end{IEEEproof}
-
 
 With Lemma \ref{evenly}, we can get the exact increment of expectation when different crawling times are implied to a same sensor. This can be used to minimize the overall expectation of repository latency, which formalized as $\Arrowvert \phi\mathbf{T} \Arrowvert_{1}$ above.
 Here the relationship between crawling time and $E[\phi(n)]$ can be computed simply as follows, where $\phi(n)$ stands for the optimal strategy with $n$ crawls, and $T$ is the time period within consideration. 

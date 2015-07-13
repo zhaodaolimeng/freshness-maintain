@@ -318,25 +318,27 @@ In addition, the computation of $E_h[G(t)]$ and $E_f(t_s,t)$, which are both lat
 
 In the following paper, we start to design subroutines for the computation of $E_L(n_i)$.
 At first, A dynamic programming method is put forward for an optimal solution,  but the time complexity is somewhat unacceptable for large datasets.
-So, then we proposed a greedy method as a trade-off for time efficiency. 
+So, we proposed a greedy method as a trade-off for time efficiency. 
 All these two methods are used to compute the crawl plan $\phi$ of a single sensor with sleep behavior, which leads to a optimal latency expectation $E_L(n_i)$.
 
 \subsection{Dynamic Programming Method for Optimal Crawl}
 
 In a real world IoT system, sensors' sleep plan make them difficult to crawl in a fix interval. 
 Actually, the best crawl plan may be very different from a periodic crawl, especially when the sleep plan is not periodic.
-With the previous discretization process, we have a chance to enumerate all the possible crawl plans. The following dynamic programming(DP) method take an advantage of memorized search, which cached the sub-problem to accelerate the enumeration process.
+With the previous discretization process, we have a chance to enumerate all the possible crawl plans. 
+The following dynamic programming(DP) method take an advantage of memorized search, which caches the solution of sub-problem to accelerate the enumeration process.
 
 We use \textbf{timeline} to refer the discretized time table for a single sensor, which consist of the working cycle and the sleeping cycle.
 The crawl plan can actually be formed as a route planning problem given the following transformation.
 Here a directed acyclic graph(DAG) model $G(E,V)$ is used to formalize this problem.
-$E$ are the edges of the graph, and $V$ are the vertex. We suppose there are $m$ vertex. 
-There are $T$ time points in the timeline which stand for the working cycle. 
-Corresponding, there are exactly $T$ vertex in this graph, from number $1$ to number $T$. 
+$E$ are the edges of the graph, and $V$ are the vertex. 
+Suppose there are $m$ vertexes and $T$ time points in the timeline. 
+Corresponding, there are exactly $T$ vertexes in this graph, from number $1$ to $T$. 
 We define $n$ as the count of crawls used, which indicates there are $n-1$ vertex allowed to pass, because the last vertex must be chosen. 
-Now we take every points which stand for the working cycle as graph vertex, written as $v_i$. 
-For each pair of time points $t_i$ and $t_j$, if $t_i<t_j$, a directed edge $e_{i,j}$ from $v_i$ to $v_j$ is added to the graph. 
-A weight value $w_{ij}$ is set to $e_{i,j}$, whose value is $E_f(t_j, t_i)$, is the latency expectation gain of a crawl at time $t_j$ whose previous crawl is at $t_i$.
+Every points standing for the working cycle as graph vertex is written as $v_i$. 
+For each pair of time points $t_i$ and $t_j$, if $t_i<t_j$, a directed edge $e_{i,j}$ from $v_i$ to $v_j$, is added to the graph. 
+A weight value $w_{ij}$ is set to $e_{i,j}$, whose value is $E_f(t_j, t_i)$.
+$E_f(t_j, t_i)$ is actually the latency expectation gain of a crawl at time $t_j$ whose previous crawl is at $t_i$.
 Our problem is, how to find a path $e_{1,i},\ldots,e_{j,T}$ from $v_1$ to $v_m$, which take exactly $n$ steps, that minimum the sum of all the weights alongside. 
 This transform process can be illustrated by Fig.\ref{fig:problemtrans}.
 \begin{figure}
@@ -348,7 +350,7 @@ This transform process can be illustrated by Fig.\ref{fig:problemtrans}.
 \end{figure}
 
 With an acceptable scale of time range $T$ and crawl time $n$, this problem can be solved by DP method \ref{alg:dp_min}. 
-Solution state with a vertex $v_i$ and the available crawl time $n'$ left can be used as an sub-problem. 
+Solution state with a vertex $v_i$ and the available crawl time $n'$ left is an sub-problem. 
 The optimal expectation can be computed by adding weight $w_{i,j}$ with all the expectation known in sub-problems. 
 The recursive relationship can be summarized with expression \eqref{dp}.
 \[f(v_i, n')=\left\{
@@ -361,7 +363,10 @@ The recursive relationship can be summarized with expression \eqref{dp}.
 \right.
 \]
 
-$f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v_i$, with cost exactly $n$ steps. In each step, we go over the  The computation complexity of iterating process is $O(T^2n)$, in which $nT$ sub-problem are computed and each computation will cost $n$ operations. The backtrack method uses $p(v_i, n)$ to get the optimal strategy, which takes at most $n$ steps. As a result, the overall time complexity is still $O(T^2n)$.
+$f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v_i$, with cost exactly $n$ steps. In each step, we go over the timeline for $T^2$ times.
+So the time complexity of iterating process is $O(m^2n)$, in which $nm$ sub-problem are computed and each computation will cost $m$ operations. 
+The backtrack method uses $p(v_i, n)$ to get the optimal strategy, which takes at most $n$ steps. 
+As a result, the overall time complexity is still $O(m^2n)$.
 \begin{algorithm}
 \caption{DP Method for Optimal Crawl}
 \label{alg:dp_min}
@@ -386,12 +391,14 @@ $f(v_i,n')$ is the sum of weight of a path that start from $v_1$ and end with $v
 \subsection{Greedy Method for Time efficiency}
 
 Previous DP method is a generic way to compute the accuracy crawl plan. 
-Although it's proven a optimal solution, the computation complexity is relatively high.
+Although it can return a optimal solution, the computation complexity is relatively high.
 Most of the time, there is no need to compute a optimal plan, especially when the computation resource is intensive.
 With more insights, we find crawl planning of a single sensor can be boosted in some special case.
 In this section, we introduce a greedy crawl planning method, which is a perfect approximation.
 
-We start from the inner property of crawl planning for a single sensor, this problem actually can be formalized to expression \ref{greedy_obj}. Here $E_f(t_i,t_{i+1})$ are the expectation function for a time period.
+We start from the inner property of crawl planning for a single sensor. 
+This problem actually can be formalized by expression \ref{greedy_obj}. 
+Here $E_f(t_i,t_{i+1})$ are the expectation function for a time period.
 \begin{eqnarray}
 \begin{array}{ll}
 \min_{\textbf{t}}& \sum_{i=1}^{n} E_f(t_i,t_i+1)\\
@@ -401,11 +408,11 @@ We start from the inner property of crawl planning for a single sensor, this pro
 \end{array}\label{greedy_obj}
 \end{eqnarray}
 
-The result of this problem is actually $E_L[G(n)]$, the minimal latency that can be achieved with $n$ crawls.
+The result of this problem is actually $E_L(n)$, the minimal latency that can be achieved with $n$ crawls.
 If both $E_f(c, t_i)$ and $E_f(t_i,c)$ are convex, where $c$ is a constant, then this problem is a convex optimization problem, which can be solved using greedy method.
 In the follow analysis, we looked into two special situation, and explained why greedy method can not achieve the optimal solution in the most general case.
 
-In the first case, we assume the sensor is working continuously.
+In the first case, we assume the sensor works continuously.
 An intuition to solve this problem is to evenly distributed the crawling action across the timeline. 
 We prove this method actually leads to an optimal value.
 \begin{lemma}
@@ -413,15 +420,16 @@ We prove this method actually leads to an optimal value.
 The optimal crawl plan of an continuously working sensor is to scatter the crawl action over the timeline $t\in [0, T]$ as evenly as possible, where $T$ is a constant.
 \end{lemma}
 \begin{IEEEproof}
-The evenly crawl proposition here can be proved by the convexity of $E_h[G(t)]$ \cite{boyd2004convex}. 
-Here we donate $E_h[G(t)]$ as $f(t)$ for convenience. 
+This proposition can be proved by the convexity of $E_h[G(t)]$ \cite{boyd2004convex} with induction. 
+Here we donate $E_h[G(t)]$ as $f(t)$ for convenience.
 We start from the situation where only two crawling are allowed. 
 As a result, the latency expectation gain during $[0,T]$ is marked as $F(0, T)$.
 $F(0,T)$ is divided into $f(t)$ and $f(T-t)$ with a time point $t\in[0,T]$. 
 With the convexity of $f(t)$, we have $2f(T/2)<f(T/2-\epsilon)+f(T/2+\epsilon)$ for $\forall{\epsilon>0}$. 
 By plugging in $F(T)$, we get $F(T/2)<F(T/2+\epsilon)$ for $\forall{\epsilon>0}$.
-This indicates $T/2$ is the minimum point of $F(t)$, which means the evenly crawl is the best strategy for 2 crawls situation.
-Now suppose there are $n$ crawling actions, among which first $n-1$ action evenly divide the timeline. The time length of $n$-th crawling action does not equal to the adjacent one's, and we claimed this strategy is optimal. For any adjacent pair divided by a single crawling action, if the division is not evenly, we can choose the evenly one as a new strategy, which can lead to a larger $f(t)$ according to the proposition above, which is a contradiction.
+This indicates $T/2$ is the minimum point of $F(t)$, which means the evenly crawl is the best strategy for the situation with only $2$ crawls.
+Now suppose there are $n$ crawling actions, among which first $n-1$ actions evenly divide the timeline.
+For last two pieces of crawl intervals divided by the $n$-th crawl, we can choose the evenly one as a new strategy, which leads to a larger $f(t)$.
 \end{IEEEproof}
 
 With Lemma \ref{evenly}, we can get the minimal gain of latency for different crawl time $n$.
@@ -429,21 +437,20 @@ If the sensor works without any sleep, the relationship between crawl time and $
 According to the result from appendix, $E_h[G(n)]$ has an close-form expression as $T(T\lambda/n-1+e^{-T\lambda/n})$. 
 With this function, the minimum expectation can be calculated directly.
 
-When sensor work periodically, the previous conclusion holds for some situations. 
-Here we only look into sensors with exactly same work cycles.
-As some time points can not be accessed, the expectation function in this situation is actually piecewise.
-Here we use $T^{w}_{i}$ and $T^{s}_{i}$ as the length of $i$-th working and sleep cycle respectively in the sleep plan of sensor $i$.
-If sensor works periodically, the intact cycle is marked as $T^{c}$, where $T^{c}=T^{w}+T^{s}$ holds.
+Then we illustrated that this intuition holds for the situation when sensor work periodically, with some constraints.
+Some points in the timeline can not be accessed, the expectation function in this situation is actually piecewise.
+Here we use $T^{w}$ and $T^{s}$ as the length of working and sleep cycle respectively.
+If sensor works periodically, the intact cycle is marked as $T^{c}$, where $T^{c}=T^{w}+T^{s}$.
 The intuition to solve problem is to arrange the crawls at the end of a work cycle.
 We show this intuition is indeed an optimal strategy when the crawl interval is an integral multiple of duty cycle $T^{c}$.
 \begin{lemma}
 \label{evenly_s}
-For periodically sleeping sensors, suppose a sensor has exactly an integral multiple of duty cycle, indexed from $1$ to $m$.
+For periodically sleeping sensors, suppose the sensor's duty cycles has exactly an integral multiple of numbers of crawls, indexed from $1$ to $m$.
 The optimal strategy is to make $n$ times of crawl at the end of a working cycle, whose index $i$ satisfies $i \bmod (m/n)=0$.
 \end{lemma}
 \begin{IEEEproof}
-We still use induction for the proof.
-For the most simple case, when number of crawls $n=2$, the first crawl at time $t'$ and second one at the end. 
+We still use induction for this proof.
+For the most simple case, when number of crawls $n=2$, the first crawl locates at time $t'$ and second one at the end. 
 This strategy is optimal due to any increase of $t'$ will cause a gain in the object function by $E_f(0,t'+T^{w})-E_f(0,t')$, and any decrease of $t'$ will raise the object function due to the evenly divide.
 For the case when $n>2$, the problem can be constructed by add $t'/T^{c}$ cycles, where if Lemma \ref{evenly_s} holds for $n$, it must holds for $n+1$.
 \end{IEEEproof}
@@ -471,24 +478,23 @@ The result can be computed in one pass, so the complexity of this approach is $O
 	\end{algorithmic} 
 \end{algorithm}
 
-At last, for the most general situation, the latency expectation function $E_f(t_s,t)$ are not the same.
-Unfortunately, for this case, the previous evenly divide assumption no longer holds, which means the greedy method for searching crawl plan can not lead to a optimal value. 
-It's because that, the expectation function with two variables $E_f(t_s,t)$ is not convex when $t$ is fixed.
+At last, we discuss the most general situation. 
+When the length of working cycles are not the same, or the number of duty cycle is not divisible by $m$, or the length of duty cycles are different, the previous intuitions no longer holds.
+In these situations, the greedy method for searching crawl plan can not lead to a optimal value. 
+It's because the expectation function with two variables $E_f(t_s,t)$ is not convex when $t$ is fixed.
 As a consequence, local minimum may exists in the result, which makes the solution generated by greedy method possibly not the optimal one.
 Even though, we add this non-optimal method in our final implementation, because of its good performance in real world datesets.
 
 \section{Simulation and Evaluation} \label{simulation}
 
-In the evaluation section, we tested the performance of EasiCrawl under different settings and input parameters, which illustrated the effectiveness with real events sequence. 
-Latency expectation which are previously used as a optimization object are taken as the measurement.
+In this section, we will test the performance of EasiCrawl under different settings and input parameters. 
 \subsection{Settings}
-Here the latency sum of generated events and executing duration are considered as measurements.
+Latency expectation which are previously used as a optimization objective are taken as the measurement.
 Sensor scales $N$, total crawl limit $\theta$, discretization step length $\epsilon$, and time range $T$ of scheduling are tested during the following simulations. 
-As the input, we use a randomized method to generate the sleep plan for each sensor, where we used a Poisson process generator to generate the simulation events.
+As the input, we use a randomized method to generate the sleep plan for each sensor, and we used a Poisson process generator to generate the simulation events.
 We use a random schedule method, called RandomCrawl, as a comparison. 
 RandomCrawl use the same method as EasiCrawl to initialize the arrangement of crawls to different sensors. 
-Then, for each sensor, the crawl plan are set randomly, the last timestamp are chosen to ensure all the event are captured. 
-In addition, the time unit of these simulation are all minutes, and we take 1 min as the minimum unit that can be used for scheduling.
+Then, for each sensor, the crawl plan are set randomly, the last timestamp are chosen to ensure all the events are captured. 
 All these simulation are implemented on a PC with MATLAB.
 \begin{figure*}
 	\minipage{0.32\textwidth}
@@ -536,39 +542,45 @@ We first study the impact of \textbf{sensor scale $N$}.
 We mainly test the latency of dynamic programming schedule method of single sensor in this simulation. 
 All the sleep plan of sensors are previously known.
 The total crawl limit $\theta$ is set as the multiple of sensor scale, varies from 10 to 200. 
-The Poisson parameter $\lambda$ of each sensor is randomly chosen from 0 to 1. The schedule time range $T$ is set as 200 time units. In each improvement iteration, the crawl time arrangement $n_i$ for different sensors are changed by the step length of 1. For each sensor scale, we repeated the simulation for 5 times, and compute the average, minimum and maximum value of latency expectations. Simulation result is plot in Fig. \ref{fig:test1_sensorscale}.
-Simulation shows a promising result. The latency expectation of EasiCrawl is far below the random one, even take error bar into consideration. This is mainly because the theoretical optimal property of EasiCrawl when given a sequence of discretized time nodes. 
+The Poisson parameter $\lambda$ of each sensor is randomly chosen from 0 to 1. 
+The schedule time range $T$ is set as 200 time units. 
+In each improvement iteration, the crawl time arrangement $n_i$ for different sensors are changed by the step length of 1. 
+For each sensor scale, we repeated the simulation for 5 times, and compute the average, minimum and maximum value of latency expectations. 
+Simulation result is plot in Fig. \ref{fig:test1_sensorscale}.
+In the result, EasiCrawl surpass the RandomCrawl by 2 times in reducing the latency expectation, even take error bar into consideration. 
+This is mainly because the theoretical optimal property of EasiCrawl when given a sequence of discretized time nodes. 
 
-\textbf{The total number of crawls $\theta$} which the server can at most start is an important constraint for EasiCrawl. 
+\textbf{The total number of crawls $\theta$} reveals the limit of the IoT search engine.
 In this test, EasiCrawl worked on sensor scale of 10, crawling time range of 200, and discrete step length of 2, where minute is the unit. 
 We use RandomCrawl as a reference, and test 40 different crawl limits on EasiCrawl and RandomCrawl, ranging from 10 to 50, which show a result as Fig.\ref{fig:test2_totalcrawl}.
 The result first show the advantages of EasiCrawl against RandomCrawl. 
-More important, we notice there's a submodular trends for total crawls, which means the gain of server side crawl ability pay less when limits grow larger, and this result is theoretically reasonable. 
-This suggest us to find a proper trade-off of server cost and schedule efficiency.
+More important, we notice there's a submodular relationship between total crawls and the latency reduction, which means the gain of server side crawl ability pay less when limits grow larger. 
+This is important for us to find a proper trade-off between server cost and schedule efficiency.
 
 Time table of sleep plans should be discretized with a \textbf{discretization step length $\epsilon$} before starting scheduling. 
-There is a trade off between the computation time and final accuracy. 
+The choice of discretization step length is a trade off between the computation time and final accuracy. 
 We use a simulation with 10 sensors and a time range $T$ of 500, to test the relationship between time complexity and expectation accuracy. 
 The total crawl count $\theta$ is set to 100 times.
-We carried on 20 groups of test, where the discretization step length $\epsilon$ ranges from 1 to 20.
+We carried on 20 groups of tests, where the discretization step length $\epsilon$ ranges from 1 to 20.
 Fig.\ref{fig:test3_discretestep} shows a positive result to our analysis of the dynamic programming crawl method used in EasiCrawl. 
 While latency expectation increase about 400 units, the computation time decreased from 1 seconds to below 0.1 seconds. 
-This result fits the theoretical analysis, where for scheduling each sensor, the time complexity is $O(T^{2}n)$, $n$ is the crawl limit.
-When $\epsilon$ is relatively small, the number $M$ of total time nodes which can used to crawl is large, leading to a higher computation cost.
+This result fits the theoretical analysis, where for scheduling each sensor, the time complexity is $O(m^{2}n)$, $n$ is the crawl limit and $m$ is the number of time points.
+When $\epsilon$ is relatively small, the number $m$ of total time nodes which can used to crawl is large, leading to a higher computation cost.
 
 \textbf{Time range $T$} directly affect the executing time and running frequency of EasiCrawl.
 We use the same experiment settings as that of discretization test. 
 10 simulated sensors are used, the total crawl sum $\theta$ is 30. 
-For time range $T$ varies from 50 to 1000, a new time table is generated in each iteration. 
-The time range $T$ which EasiCrawl schedules on has a similar effect as the discretization step $\epsilon$. 
-The computation time showed in Fig.\ref{fig:test4_timerange} is very close to the analysis result, which is quadratic. 
-The expectation share a similar shape because the distance between the distribution and the end time $t$ can also be approximated as a quadratic function.
+For time range $T$ varies from 50 to 1000, a new time table is generated in each iteration.
+$T$ has a similar effect as the discretization step $\epsilon$. 
+The computation time showed in Fig.\ref{fig:test4_timerange} is very close to the analysis result, which quadratic relationship between $T$ and running time can be inferred. 
+The expectation shares a similar shape because the distance between the distribution and the end time $t$ can also be approximated as a quadratic function.
 
 Two totally different \textbf{plan methods}, the DP method and the greedy one, are used in EasiCrawl.
 In the previous evaluations, only the DP methods are used for finding the best schedule for each sensors. 
 In this test, both of the methods are tested. 
 Tests are performed for 10 times with different sensor scale varies from 10 to 100. 
-4 different group of sensors are used for each test. Sensors in the first group are all scheduled with DP method. 
+4 different group of sensors are used for each test. 
+Sensors in the first group are all scheduled with DP method.
 In the second group, half of the sensors are, while the other half use greedy based method. 
 The third group used pure greedy based method. We also use the RandomCrawl method as a reference, which is the fourth group.
 Result are showed in Fig.\ref{fig:test5_sensortype}. 
@@ -588,14 +600,16 @@ Apparently, when the number of total crawls grow bigger, a larger mean value is 
 \section{Case Study With Xively} \label{case_study}
 
 Xively is a platform which integrates IoT sensors. 
-With thousands of sensors which can simply accessed with ip protocols, Xively become a ideal platform for our crawl method.
+With thousands of sensors that can be simply accessed with through ip protocols, Xively become a ideal platform for our crawl method.
 We built a mini IoT search system to test our crawl scheduling method EasiCrawl, where we continuously monitored several datastream of 3 airqualityegg\cite{airegg} sensors located in London and Tokyo as an example for our case study. 
 Actually, accessing the sensors is accomplished by query the Xively database which hold the up-to-date sensor information. 
 This makes no different for us than directly accessing a real sensor. 
 One problem here is that most raw sensors on Xively don't support semantic senor description functions. 
-So we add a describing layer, which translate raw data streams to event sequence. 
-Here we make several settings. 
+So we add a describing layer, which translate raw data streams to event sequence, by generating a log for the abnormal events in the raw data. 
 For example, a sudden raise in temperature or violation of radiation limit are taken as events, which will be stored as a item of description.
+We consider the high level of CO, NO\textsubscript{2}, are danger events, and the quick raise in temperature or quick changes in humidity may be caused by the miss use of electrical equipments, which should be also recorded. 
+We also consider the temperature changes in the night time not interesting, only to test the effectiveness of scheduling non-periodic sensors.
+
 \begin{figure}
 	\centering
 	\hspace{-1.0em}
@@ -606,11 +620,9 @@ For example, a sudden raise in temperature or violation of radiation limit are t
 	\label{fig:xivelycasestudy}
 \end{figure}
 
-In this case, the parameter for Poission process of the arriving event sequence are estimated previously.
+In this case, the parameter for Poisson process of the arriving event sequence are estimated periodically before EasiCrawl is invoked.
 Fig.\ref{fig:xivelycasestudy} is the raw sensor data of 4 different data streams, including CO, Humidity, NO\textsubscript{2}, along with the corresponding scheduling result. 
 The circle marks are the event captured and recorded which users may care. 
-Here, we consider the high level of CO, NO\textsubscript{2}, are danger events, and the quick raise in temperature or quick changes in humidity may be the miss use of electrical equipments, which should be also recorded. 
-We also consider the temperature changes not interesting, only to test the effectiveness of scheduling non-periodic sensors.
 The triangle marks are the actual crawls. 
 EasiCrawl can always hold a low latency level, which is 2 to 3 times lower than that of RandomCrawl.
 
@@ -620,7 +632,8 @@ In this paper, we introduce EasiCrawl, a crawl scheduling strategy which runs an
 EasiCrawl can be used with sensors which sleep periodically, which is ideal to be used in IoT search system. 
 Effectiveness of EasiCrawl is also showed in simulations and a case study with Xively. 
 The drawbacks of EasiCrawl lies in the blindness when crawling sensors whose sleep plan is unknown. 
-Also the fixed step length for improve arrangements, which is not a effect way for optimizing, needs to be improved.
+So, automatic parameter choosing mechanism is urgently needed.
+Besides further works should be done to enhance the description layer in our prototype.
 
 \section*{Acknowledgment}
 
@@ -643,21 +656,36 @@ The authors would like to thank...
 \section{Analysis of Latency Expectation}
 
 \subsection{Expectation of Sensor with Sleep Behavior}
-Although previous work\cite{Cho2000} give out a similar result, we introduce a simpler way for deducing $E_f(t_s, t)$ when sensor works without sleep. For simplification, suppose the IoT sensor crawled start working at time $0$. The total freshness latency when crawl at time $t$ can be considered as an random variable $G(t)$, so our goal can be rewritten to compute the expectation $G(t)$, written as $E[G(t)]$. 
-Notice $E[G(t)]$ can be divide into different parts due to the count of events $U_i$ happen during $[0, t)$, then $E[G(t)]$ can be written as:
+
+In this section, we first introduce a simple way for deducing $E_f(t_s, t)$ when sensor works without sleep.
+Then we discuss the computation of latency expectation $E_L[G(t)]$ where sensor has sleep behavior.
+At last we prove $E_L[G(t)]$ is a convex function of $t$.
+
+We suppose the IoT sensor crawled start working at time $0$ for convenience. 
+The total latency expectation when crawl at time $t$ can be considered as an random process $G(t)$. Our goal can be rewritten to compute the expectation $G(t)$, written as $E[G(t)]$. 
+Notice $E[G(t)]$ can be divide into different parts due to the count $N(t)$ of events which happen during $[0, t)$, then $E[G(t)]$ can be written as:
 \begin{equation}
 E[G(t)] = \sum_{n=1}^{\infty} E[G(t)|N(t)=n]P(N(t)=n) \label{EG}
 \end{equation}
 
-$P(N(t)=n)$ is the probability of having $n$ events during $[0,t)$, which follows Poisson Distribution, holding $P(N(t)=n)=e^{-\lambda t}{(\lambda t)^n}/{n!}$ . $E[G(t)|N(t)=n]$ can be resolved as $\frac{n}{\lambda}(t\lambda+e^{-\lambda t_m}-1)$. $t_{m}$ stands for the happened time of the $m$-th event. Taking \eqref{EG} , we get the close form solution of the expectation as equation \eqref{ExpectCont}.
+$P(N(t)=n)$ is the probability of having $n$ events during $[0,t)$, which follows Poisson distribution, where $P(N(t)=n)=e^{-\lambda t}{(\lambda t)^n}/{n!}$ holds. 
+$E[G(t)|N(t)=n]$ can be resolved as $\frac{n}{\lambda}(t\lambda+e^{-\lambda t_m}-1)$. 
+$t_{m}$ stands for the happened time of the $m$-th event. 
+By taking $E[G(t)|N(t)=n]$ into \eqref{EG}, we get the close form solution of the expectation as equation \eqref{ExpectCont}.
 \begin{equation}
 E[G(t)] = (e^{-t\lambda}-1+t \lambda)t \numberthis \label{ExpectCont}
 \end{equation}
 
-For the sleep situation, sensor starts to work at time $t_s$, and begin to work with a sleep plan.
-Here we mark $T^{c}_{i}$ as the $i$-th working cycle. $T^{c}_{i} = T^{w}_{i}+T^{s}_{i}$, where $T^{w}_{i}$ is the $i$-th working cycle and $T^{w}$ is the $i$-th sleeping cycle. 
-It's hard to directly deduce an expectation for a Poisson process whose timeline is break up. However, with equation \eqref{ExpectCont}, we can compute the $E_f(t, t_s)$ by subtract the expectation cause by the previous crawls from $E[G(t)]$. In this recursive way, the expectation can be calculated. Here $E_s[G(t)]$ stands for the expectation to crawl a sleep enabled sensor at time $t$, $E[G(t)]$ still stands for the expectation if this particular sensor doesn't sleep.
-Start time $t_s=0$, $E_f(t_s,t)$ can be written as $E_s[G(t)]$.Suppose time $t$ locates in an working period, written as $t \in [t_s + \sum_{i=1}^{k} T^{c}_{i}, t_s + \sum_{i=1}^{k} T^{c}_{i} + T^{w}_{i}]$, where $k\in\mathbb{N}$. This assumption is based on the fact that, any crawl at a sleeping cycle can be bring forward to last work cycle for a better latency expectation.
+For sensors with sleep behavior, we suppose sensor starts to work at time $t_s$, and begin to work with a sleep plan.
+Here we mark $T^{c}_{i}$ as the $i$-th working cycle. 
+$T^{c}_{i} = T^{w}_{i}+T^{s}_{i}$, where $T^{w}_{i}$ is the $i$-th working cycle and $T^{w}$ is the $i$-th sleeping cycle. 
+It's hard to directly deduce an expectation for a Poisson process whose timeline is break up.
+However, with equation \eqref{ExpectCont}, we can compute the $E_f(t, t_s)$ by subtract the expectation cause by the previous crawls from $E[G(t)]$. 
+In this recursive way, the expectation can be calculated. 
+Here $E_h[G(t)]$ stands for the expectation to crawl a sleep enabled sensor at time $t$, $E[G(t)]$ still stands for the expectation if this particular sensor doesn't sleep.
+Start time $t_s=0$, $E_f(t_s,t)$ can be written as $E_h[G(t)]$.
+Suppose time $t$ locates in an working cycle, written as $t \in [t_s + \sum_{i=1}^{k} T^{c}_{i}, t_s + \sum_{i=1}^{k} T^{c}_{i} + T^{w}_{i}]$, where $k\in\mathbb{N}$. 
+This assumption is based on the fact that, any crawl at a sleeping cycle can be bring forward to last work cycle for a better latency expectation.
 \begin{align*}
 E_h[G(t)] & = E[G(t-T^{L}(K))] + \\
 	& \sum_{i=1}^{K}(E[G(t-T^{L}(K-i))]-\\
@@ -667,9 +695,12 @@ E_h[G(t)] & = E[G(t-T^{L}(K))] + \\
 \end{align*}
 
 Here $T^{L}(K) = \sum_{j=1}^{K} T^{c}_{j}$, which is time duration of first $K$ cycles, and $K$ is the count of cycle $T^{C}$. 
-For any time $t$ in a sensor working cycle, by summing those expectations before $t$, the overall expectation of latency can be achieved when take sensor sleep cycle into consideration. The first factor of \eqref{ExpectSleep} is the expectation of last working cycle, and the sum is the expectation of the previous working cycle.
+For any time $t$ in a sensor working cycle, by summing those expectations before time $t$, the overall expectation of latency can be achieved when take sensor sleep cycle into consideration. 
+The first factor of \eqref{ExpectSleep} is the expectation of last working cycle, and the sum is the expectation of the previous working cycle.
 
-Expression\eqref{ExpectSleep} is a simplified form of $E_h[G(t)]$, and it's direct to show this expression is continuous and derivable. Here we try to compute the one-order derivative on $t$.
+Expression \eqref{ExpectSleep} is a simplified form of $E_h[G(t)]$.
+We use this simplified version to show $E_h[G(t)]$ is indeed convex.
+Here we try to compute the one-order derivative on $t$.
 \[\frac{\partial E_h[G(t)]}{\partial k} = \left\{
 \begin{array}{lr}
 c_i+\gamma_i t & \text{if }t \in [T^{L}_{i}, T^{L}_{i}+T^{w}]\\
@@ -678,13 +709,17 @@ c_i & \text{if }t \in [T^{L}_{i}+T^{w}, T^{L}_{i+1}]
 \right.
 \]
 
-The result is a continuous linear piecewise function, where $c_i$ and $\gamma_i$ are constraints. The meaning of expression \eqref{ExpectSleepAnother} is actually the gain speed of latency expectation. With expression \eqref{ExpectSleepAnother}, the second order derivation $\nabla^{2} E_h[G(t)]\geq0$ in its domain, and the convexity of function \eqref{ExpectSleep} is proofed. 
+The result is a continuous linear piecewise function, where $c_i$ and $\gamma_i$ are constraints.
+The meaning of expression \eqref{ExpectSleepAnother} is actually the gain speed of latency expectation. 
+With expression \eqref{ExpectSleepAnother}, the second order derivation $\nabla^{2} E_h[G(t)]\geq0$ in its domain, and the convexity of function \eqref{ExpectSleep} is proved. 
 
 \subsection{Expectation of Arbitrary Period}
-Previous analysis computes the expectation with the start time at $0$. The problem of computing $E_f(t,t_s)$ if $t\ne0$, can be solved given the previous analysis. This problem be divided into two situation according to the value of $t_s$.
+Previous analysis computes the expectation with the start time at $0$. 
+The problem of computing $E_f(t,t_s)$ if $t\ne0$, can be solved given the previous analysis. 
+This problem can be divided into two sub-problem by value of $t_s$.
 Assume that $t_s\in [0,T^{c}_{1}]$, other case can be transformed to this by shifting $t_s$ and $t$.
 If $t_s$ is in a sleeping cycle, then expectation can just be calculated from the next work cycle.
-Otherwise, if $t_s$ is in a working cycle, the expectation can be estimate by $E_h[G(t)]$ which start at $0$ subtract the latency expectation cause by the events arriving at time $[0, t_s)$.
+Otherwise, if $t_s$ is in a working cycle, the expectation can be estimate by $E_h[G(t)]$ which start at $0$ subtract the latency expectation cause by the events arriving at time $[0, t_s]$.
 
 We define $t'=t-(t_s\bmod T^{c}_{1})$ and $t''=t-T^{c}_{1}$ for convenience, where $T^{c}_{1}$ is the length of first cycle.
 Here the minuend means the expectation at time point $t$ of latency during time period $[0, t_s]$.
@@ -698,6 +733,6 @@ E_h[G(t'')]-E[G(t'')]+E[G(t-t_s)]\\
 \right.
 \]
 
-Combine expression \eqref{ExpectSleep} and \eqref{Eftts}, the expectation of latency of periodic sleep sensors can be computed.
+Combine expression \eqref{ExpectSleep} and \eqref{Eftts}, the latency expectation of periodic sleep sensors can be computed.
 
 \end{document}

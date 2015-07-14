@@ -36,12 +36,12 @@
 	\begin{axis}[
 	axis y line*=left,
 	ymin=0, ymax=1800000,
-	xlabel=Time Range,
-	ylabel=Latency Expectation]
+	xlabel=Time Range (min),
+	ylabel=Expected Latency (min)]
 	
 	\addplot[smooth,mark=x,red] table 
 	[x={timeRange}, y={latency}] {\discretesteptable};
-	\addlegendentry{Latency Expectation}
+	\addlegendentry{Expected Latency}
 	\label{plot_one}
 	\end{axis}
 	
@@ -49,11 +49,11 @@
 	axis y line*=right,
 	axis x line=none,
 	ymin=0, ymax=50,
-	ylabel=Execution Time,
+	ylabel=Execution Time (s),
 	ylabel near ticks, yticklabel pos=right]
 	\addplot[smooth,mark=o,blue] table [x={timeRange}, y={duration}] {\discretesteptable};
-	\addlegendentry{Execution Time}
-	\addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Latency Expectation}
+	\addlegendentry{Execution Time (s)}
+	\addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Expected Latency}
 	\end{axis}
 	\end{tikzpicture}
 \end{document}

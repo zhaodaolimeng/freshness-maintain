@@ -35,23 +35,23 @@
 	\begin{axis}[
 	axis y line*=left,
 	ymin=24000, ymax=25000,
-	xlabel=Discrete Step Length,
-	ylabel=Latency Expectation]
+	xlabel=Discrete Step Length (min),
+	ylabel=Expected Latency (min)]
 	
 	\addplot[smooth,mark=x,red] table [x={steplength}, y={latency}] {\discretesteptable};
-	\addlegendentry{Latency Expectation}
-	\label{plot_one}
+	\addlegendentry{Expected Latency}
+	\label{plot_discrete_one}
 	\end{axis}
 	
 	\begin{axis}[
 	axis y line*=right,
 	axis x line=none,
 	ymin=0, ymax=1,
-	ylabel=Execution Time,
+	ylabel=Execution Time (s),
 	ylabel near ticks, yticklabel pos=right]
 	\addplot[smooth,mark=o,blue] table [x={steplength}, y={duration}] {\discretesteptable};
-	\addlegendentry{Execution Time}
-	\addlegendimage{/pgfplots/refstyle=plot_one}\addlegendentry{Latency Expectation}
+	\addlegendentry{Execution Time (s)}
+	\addlegendimage{/pgfplots/refstyle=plot_discrete_one}\addlegendentry{Latency Expectation}
 	\end{axis}
 	\end{tikzpicture}
 \end{document}

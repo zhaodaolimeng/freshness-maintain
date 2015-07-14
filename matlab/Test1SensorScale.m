@@ -1,6 +1,6 @@
 % This file the benchmark of EasiCrawl under different sensor scale.
 
-discreteStep = 2;
+discreteStep = 1;
 eps = 10;
 iteratorLimit = 20;
 

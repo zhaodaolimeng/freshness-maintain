@@ -51,7 +51,7 @@ end
 
 sensors = 4;
 timeTable(1).value=[0,336];
-timeTable(2).value=[0,336];
+timeTable(2).value=[(0:6)*48+24;zeros(1,7)+24]';
 timeTable(3).value=[0,336];
 timeTable(4).value=[(0:6)*48+24;zeros(1,7)+24]';
 
@@ -64,7 +64,10 @@ lambdaList = [length(coList),length(huList),length(noList),length(teList)]/336;
 crawlLimitList = [10,10,10,10];
 
 disp('Random');
-[ropt,arrange,rplans] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
+[ropt,rarrange,rplans] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
+disp('Evenly')
+[eopt,earrange,eplans] = EvenlyCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep);
+
 disp('DP');
 sensorType = ones(1,sensors);
 [opt,arrange,rate,plans] = EasiCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep,eps,iteratorLimit,sensorWeight,sensorType);
@@ -76,6 +79,20 @@ eventTable(4).value = teList;
 totalLatency = 0;
 for i = 1:4
     crawls = sort(rplans(i).value);
+    for co = eventTable(i).value
+        for crawl = crawls
+            if crawl >= co
+                totalLatency = totalLatency + (crawl - co);
+                break;
+            end
+        end
+    end
+end
+disp(['Latency = ' num2str(totalLatency)]);
+
+totalLatency = 0;
+for i = 1:4
+    crawls = sort(eplans(i).value);
     for co = eventTable(i).value
         for crawl = crawls
             if crawl >= co

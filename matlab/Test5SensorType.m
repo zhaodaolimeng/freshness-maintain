@@ -6,7 +6,7 @@
 % 3. 100% of sensors are dp based
 
 clear;clc;
-discreteStep = 2;
+discreteStep = 1;
 eps = 10;
 iteratorLimit = 20;
 

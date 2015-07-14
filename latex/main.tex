@@ -610,7 +610,7 @@ One problem here is that most raw sensors on Xively don't support semantic senor
 So we add a describing layer, which translate raw data streams to event sequence, by generating a log for the abnormal events in the raw data. 
 For example, a sudden raise in temperature or violation of radiation limit are taken as events, which will be stored as a item of description.
 We consider the high level of CO, NO\textsubscript{2}, are danger events, and the quick raise in temperature or quick changes in humidity may be caused by the miss use of electrical equipments, which should be also recorded. 
-We also excluded the temperature changes in the day time, only to test the effectiveness of scheduling non-periodic sensors.
+We do not consider the temperature and humidity changes in the day time as interesting events, only to test the effectiveness of scheduling non-periodic sensors.
 
 \begin{figure}
 	\centering
@@ -627,8 +627,7 @@ Fig.\ref{fig:xivelycasestudy} is the raw sensor data of 4 different data streams
 The circle marks are the event captured and recorded which users may care. 
 The triangle marks are the actual crawls. 
 EasiCrawl can always hold a low latency level, which is 2 to 3 times lower than that of RandomCrawl.
-% average delay of sensors....
-
+In this particular case, the average latency of the RandomCrawl is about 23 hours, while for EasiCrawl, the time is reduced to 13 hours. 
 
 \section{Conclusion} \label{conclusion}
 

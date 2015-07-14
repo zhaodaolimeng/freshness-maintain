@@ -1,8 +1,8 @@
-function [opt,arrange,plans] = RandomCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep)
+function [opt,arrange,plans] = EvenlyCrawl(lambdaList,timeTable,crawlLimitList,sumOfCrawl,discreteStep)
 %% 
 % A random method to generate a schedule strategy for sensors
 sensors = length(lambdaList);
-disp('Starting RandomCrawl ...');
+disp('Starting EvenlyCrawl ...');
 distanceMatrix = DiscretizeTimeline(timeTable,lambdaList,discreteStep);
 % random arrange number of crawls
 arrange = EvenlyDivide(crawlLimitList,sumOfCrawl);
@@ -11,7 +11,10 @@ for sensor = 1:sensors
     dist = distanceMatrix(sensor).value;
     numberOfNodes = size(dist,1);
     
-    crawls = sort(randsample(1:numberOfNodes-1, arrange(sensor)-1));    
+    d = numberOfNodes/(arrange(sensor)-1);    
+    crawls = d:d:numberOfNodes-1;    
+    crawls = ceil(crawls);
+    
     expect = 0;
     lastNode = 1;
     for crawl = crawls

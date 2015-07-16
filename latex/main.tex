@@ -81,13 +81,16 @@
 
 \begin{abstract}
 	
-Search of the Internet of things is an important way for people to exploit useful sensors. Crawling the content of low power IoT sensors is a fundamental step towards building a generic IoT search engine.
-However, the crawl of IoT sensors is very different from that of Web. In IoT systems, many low-power sensors may sleep periodically, which results in invalid crawls and unpredictable latency. Besides that, the energy consumption of crawl access becomes non-negligible.
+How to search the Internet of things effectively to identify available and useful low power sensors is an important issue for constructing IoT applications. 
+Crawling the content of low power IoT sensors is a fundamental step towards building a generic IoT search engine.
+However, crawling IoT sensors is very different from crawling web. 
+In IoT systems, many low-power sensors may sleep periodically, which may result in invalid crawls and unpredictable latency. 
+Besides, the energy consumption of crawl access is non-negligible.
 As a consequence, the traditional crawling schedule strategy is not suitable for IoT search engine.
 We first formulated the problem of crawling periodically sleeping sensors as a constrained schedule optimization problem, with the objective of minimized latency. 
 Then, we developed an a heuristic schedule, named EasiCrawl to get the near optimal expected latency. 
 At last, EasiCrawl is evaluated with simulations which show advantages over other greedy-based methods.
-A case study is also performed with real world data from Xively, showing that EasiCrawl has lower crawling latency and energy consumption than traditional Web-based search scheduling.
+Finally a case study is performed with real world data from Xively, showing that EasiCrawl has lower crawling latency and energy consumption than traditional Web-based search scheduling.
 
 \end{abstract}
 
@@ -95,11 +98,10 @@ A case study is also performed with real world data from Xively, showing that Ea
 
 \section{Introduction} \label{introduction}
 
-A large number of sensors have been deployed and connected to the Internet to collect physical information, which is provided for the human society to sense and control the physical space in an intelligent way. 
-% Importance
+A large number of sensors have been deployed and connected to the Internet, which assists the human society to sense and control the physical space in an intelligent way. 
 The extended Internet with sensors are known as the Internet of Things (IoT). 
-With booming number of sensors in IoT, it is inevitable to develop a generic search engine for users and applications to find different kinds of IoT sensors. 
-So, it can be expected that a generic IoT search engine can be used in variety scenes to improve the possibility of sharing sensors with others.
+With the booming of sensors in IoT, it is an inevitable trend to develop a generic search engine for IoT users and application builders to find different kinds of IoT sensors as required. 
+It is expected that a generic IoT search engine can be used in a variety of scenes to improve the possibility of sharing sensors with others.
 In such a way, search of IoT can significantly reduce the redundancy of sensor deployment and facilitate construction of different IoT applications using method like IFTTT\cite{ifttt}.
 % More approperate examples needed
 More specifically, in smart city applications, public sensors can be found in an ad hoc manner to provide predicates as traffic jam and queuing status. 
@@ -115,7 +117,8 @@ Fig.\ref{fig:architecture} gives the architecture of an IoT search system.
 This IoT search system consists of the sensors on the left and a IoT search engine on the right.
 In this search system, we suppose every sensors support IP protocol.
 Sensors are treated as web pages, where they can automatically update their description files.
-IoT crawlers crawl different sensors for these descriptions files, and copy these into a local repository at server side. This repository is an organized storage, with which the user queries about IoT sensors can be accomplished.
+IoT crawlers crawl different sensors for these descriptions files, and copy these into a local repository at server side. 
+This repository is an organized storage, with which the user queries about IoT sensors can be accomplished.
 We assume the user only interest in the events monitored by corresponded sensors, which arrives periodically or just randomly. 
 With the help of semantic IoT method, IoT sensors first capture the event stream and then continuously store these events within their description files. 
 IoT search engine regularly accesses these IoT descriptions and updates the related items in the repository. 
@@ -140,7 +143,7 @@ We use a clip of real world data to illustrate how the instinct of sensors' slee
 Fig.\ref{fig:smarthome} is a data stream from a temperature sensor located in a smart home environment, who acts as a sensor for air-conditioner control. 
 The quick variations and violation of threshold are taken as \textbf{interesting event}, which is logged into the description file immediately by the sensor.
 Suppose when users are not at home, these sensors will go into sleep periodically to save power.
-We marked all these interesting events out in the figure as circles..
+We marked all these interesting events out in the figure as circles.
 The traditional crawl scheduling method perform badly in this case, due to lacking awareness of sensors' sleep. 
 Traditional scheduler will use a periodical crawl method to retrieve sensors' description files.
 However, it will cause invalid accesses to sleeping ones, like what is showed at time 30 in Fig.\ref{fig:smarthome}. 
@@ -312,7 +315,8 @@ First, we use $E_f(t_s,t)$ to represent the expected latency of a time period, w
 If the crawl plan are located at $t_1,t_2,...,t_n$, then expected latency of a single sensor can be rewrote as $E_L(n) = \sum_{i=1}^{n-1}E_f(t_{i},t_{i+1})$. 
 We use $E_h[G(t)]$ as an alias for $E_f(t_s,t)$ for simplify.
 The convex of expected latency $E_h[G(t)]$ is proved in the appendix. 
-Time periods $[t_i,t_i+1]$ shares a same expectation function $E_h[G(t)]$. 
+Notice that for any optimal crawl $t$ in the middle of two adjacent time interval $[t_a,t]$ and $[t,t_b]$, $E_f(t_a,t+\varepsilon)+E_f(t-\varepsilon,t_b) = E_f(t_a,t-\varepsilon)+E_f(t+\varepsilon,t_b)$ holds for any infinitesimal $\varepsilon$, otherwise $t$ must be at the end of one work cycle.
+For the former case, the expectation function $E_h[G(t)]$ of time periods $[t_i,t_i+1]$ can be consider the same, while the latter one hold a expectation bound less than the former.
 The convexity of $E_L(n) = n E_h[G(t/n)]$ can be proofed by the convex preserve operations\cite{boyd2004convex}. 
 In this way the convexity of $E_L(n)$ can be proved.
 Our result in simulations also shows a supportive result for these analysis.
@@ -348,6 +352,7 @@ This transform process can be illustrated by Fig.\ref{fig:problemtrans}.
 	\includestandalone[width=\linewidth]{pic/problemtrans}
 	\captionsetup{justification=centering}
 	\caption{Example of Non-periodic Hibernate Problem Transformation}
+	\vspace{-1.5em}
 	\label{fig:problemtrans}
 \end{figure}
 

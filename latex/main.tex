@@ -307,19 +307,10 @@ EasiCrawl search for the best change from Step 3 to 10, and then replaced $\Phi$
 Here, we explain why this method leads to optimal schedule.
 Indeed, the correctness of EasiCrawl bases on the fact that the expected latency function for each sensor $E_L(n_i)$ are convex. 
 If $E_L(n_i)$ can be proved convex, the convexity of the object function $E_L(\Phi(\hat{n}))$, which is the sum of $E_L(n_i)$, can be proved.
-Notice that the constrains are convex, \textbf{problem \eqref{OBJ} is indeed a convex optimization problem}, in which iterative method always leads to a optimal solution.
-Next, we illustrate that $E_L(n_i)$ is convex for sensors with sleep behavior.
-More specification of sensor's sleep plan is needed for this proof.
-First, we use $E_f(t_s,t)$ to represent the expected latency of a time period, where $t_s$ and $t$ are the start time and end time. 
-If the crawl plan are located at $t_1,t_2,...,t_n$, then expected latency of a single sensor can be rewrote as $E_L(n) = \sum_{i=1}^{n-1}E_f(t_{i},t_{i+1})$. 
-We use $E_h[G(t)]$ as an alias for $E_f(t_s,t)$ for simplify.
-The convex of expected latency $E_h[G(t)]$ is proved in the appendix. 
-Notice with the optimal crawling plan for a pair of adjacent time intervals, the increasing rate of latency expectation of the previous interval are just the negative of the decrease rate of the following one, as if each interval has the same "pressure" with one another.
-In a formal way, for any optimal crawl $t$ between two adjacent time interval $[t_a,t]$ and $[t,t_b]$, $E_f(t_a,t+\varepsilon)+E_f(t-\varepsilon,t_b) = E_f(t_a,t-\varepsilon)+E_f(t+\varepsilon,t_b)$ holds for any infinitesimal $\varepsilon$, otherwise $t$ must be at the end of one work cycle.
-For the former case, the expectation function $E_h[G(t)]$ of time periods $[t_i,t_i+1]$ can be consider the same, while the latter one hold a expectation bound less than the former.
-The convexity of $E_L(n) = n E_h[G(t/n)]$ can be proofed by the convex preserve operations\cite{boyd2004convex}. 
-In this way the convexity of $E_L(n)$ can be proved.
-Our result in simulations also shows a supportive result for these analysis.
+Notice that the constrains are convex, \textbf{problem \eqref{OBJ} is indeed a convex optimization problem}, in which iterative methods always lead to optimal solutions.
+For the non-sleep and some other periodic sleeping situation, $E_L(n_i)$ is convex, which is proved in the following paper.
+For the sensors which sleeps with cycles of different length, we use experiments to show the convexity.
+A supportive result is showed in the total crawl limits evaluation in section \ref{simulation}.
 In addition, the computation of $E_h[G(t)]$ and $E_f(t_s,t)$, which are both expected latency of a single senor, is discussed in the appendix.
 
 In the following paper, we start to design subroutines for the computation of $E_L(n_i)$.

@@ -9,9 +9,11 @@ noList = [];
 teList = [];
 
 colock = 1;
+hulock = 1;
 nolock = 1;
 telock = 1;
 for i = 2:336
+    t = mod(i,48);  
     
     if CO(i)-CO(i-1) > 5000
         coList = [coList i];
@@ -22,8 +24,15 @@ for i = 2:336
         colock = 1;
     end
     
-    if abs(Humidity(i) - Humidity(i-1)) > 5
-        huList = [huList i];
+    if t < 18 || t > 36        
+        if abs(Humidity(i) - Humidity(i-1)) > 3
+            huList = [huList i];
+        elseif (Humidity(i)>50||Humidity(i)<20) && hulock == 1
+            huList = [huList i];
+            hulock = 0;
+        elseif Humidity(i)>=50 && Humidity(i)<=20
+            hulock = 1;
+        end
     end
     
     if NO2(i) - NO2(i-1) > 10
@@ -34,15 +43,14 @@ for i = 2:336
     elseif NO2(i) < 80
         nolock = 1;
     end
-    
-    t = mod(i,48);    
-    if t >24 && t< 48
-        if Temperature(i) - Temperature(i-1) > 2
+          
+    if t < 18 || t > 36
+        if Temperature(i) - Temperature(i-1) > 1
             teList = [teList i];
-        elseif (Temperature(i) > 28 || Temperature(i) < 22)&& telock == 1
+        elseif (Temperature(i) > 28 || Temperature(i) < 24)&& telock == 1
             teList = [teList i];
             telock = 0;
-        elseif Temperature(i) <= 28 && Temperature(i) >= 22
+        elseif Temperature(i) <= 28 && Temperature(i) >= 24
             telock = 1;
         end
     end

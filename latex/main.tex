@@ -307,8 +307,8 @@ EasiCrawl search for the best change from Step 3 to 10, and then replaced $\Phi$
 Here, we explain why this method leads to optimal schedule.
 Indeed, the correctness of EasiCrawl bases on the fact that the expected latency function for each sensor $E_L(n_i)$ are convex. 
 If $E_L(n_i)$ can be proved convex, the convexity of the object function $E_L(\Phi(\hat{n}))$, which is the sum of $E_L(n_i)$, can be proved.
-Notice that the constrains are convex, \textbf{problem \eqref{OBJ} is indeed a convex optimization problem}, in which iterative method always points to a optimal solution.
-Next, we can illustrate that $E_L(n_i)$ is convex for sensors with sleep behavior.
+Notice that the constrains are convex, \textbf{problem \eqref{OBJ} is indeed a convex optimization problem}, in which iterative method always leads to a optimal solution.
+Next, we illustrate that $E_L(n_i)$ is convex for sensors with sleep behavior.
 More specification of sensor's sleep plan is needed for this proof.
 First, we use $E_f(t_s,t)$ to represent the expected latency of a time period, where $t_s$ and $t$ are the start time and end time. 
 If the crawl plan are located at $t_1,t_2,...,t_n$, then expected latency of a single sensor can be rewrote as $E_L(n) = \sum_{i=1}^{n-1}E_f(t_{i},t_{i+1})$. 
@@ -401,12 +401,10 @@ As a result, the overall time complexity is still $O(m^2n)$.
 Previous DP method is a generic way to compute the accuracy crawl plan. 
 Although it can return a optimal solution, the computation complexity is relatively high.
 Most of the time, there is no need to compute a optimal plan, especially when the computation resource is intensive.
-With more insights, we find crawl planning of a single sensor can be boosted in some special case.
-In this section, we introduce a greedy crawl planning method, which is a perfect approximation.
+In the following paper, we show that the schedule procedure of a single sensor can be boosted using greedy method in some special case.
 
-We start from the inner property of crawl planning for a single sensor. 
-This problem actually can be formalized by equation \ref{greedy_obj}. 
-Here $E_f(t_i,t_{i+1})$ are the expectation function for a time period.
+The optimal schedule method for a single sensor with $n$ crawls can actually be formalized by an optimization problem \ref{greedy_obj}. 
+Here $E_f(t_i,t_{i+1})$ are the expectation function for time period $[t_i, t_{i+1}]$, given the fact $E_f(0,t)$ is convex.
 \begin{eqnarray}
 \begin{array}{ll}
 \min_{\textbf{t}}& \sum_{i=1}^{n} E_f(t_i,t_i+1)\\
@@ -416,9 +414,9 @@ Here $E_f(t_i,t_{i+1})$ are the expectation function for a time period.
 \end{array}\label{greedy_obj}
 \end{eqnarray}
 
-The result of this problem is actually $E_L(n)$, the minimal latency that can be achieved with $n$ crawls.
-If both $E_f(c, t_i)$ and $E_f(t_i,c)$ are convex, where $c$ is a constant, then this problem is a convex optimization problem, which can be solved using greedy method.
-In the follow analysis, we looked into two special situation, and explained why greedy method can not achieve the optimal solution in the most general case.
+If both $E_f(c, t_i)$ and $E_f(t_i,c)$ are convex, where $c$ is a constant, then this problem can be solved with greedy method by convexity. 
+This assumption only holds when the sensor is working continuously.
+In the follow analysis, we looked into these two situation, and explained why greedy method can not achieve the optimal solution in the most general case.
 
 In the first case, we assume the sensor works continuously.
 An intuition to solve this problem is to evenly distributed the crawling action across the timeline. 
@@ -442,8 +440,6 @@ For last two pieces of crawl intervals divided by the $n$-th crawl, we can choos
 
 With Lemma \ref{evenly}, we can get the minimal gain of latency for different crawl time $n$.
 If the sensor works without any sleep, the relationship between crawl time and $E[\phi(n)]$ can be computed with $E_h[G(n)]=nE[G(\frac{T}{n})]$.
-According to the result from appendix, $E_h[G(n)]$ has an close-form expression as $T(T\lambda/n-1+e^{-T\lambda/n})$. 
-With this function, the minimum expectation can be calculated directly.
 
 Then we illustrated that this intuition holds for the situation when sensor work periodically, with some constraints.
 Some points in the timeline can not be accessed, the expectation function in this situation is actually piecewise.
@@ -608,16 +604,17 @@ Apparently, when the number of total crawls grow bigger, a larger mean value is 
 
 \section{Case Study With Xively} \label{case_study}
 
+Here we will show the performance of EasiCrawl in reducing the crawling latency with real world dataset from Xively.
 Xively is a platform which integrates IoT sensors. 
-With thousands of sensors that can be simply accessed with through ip protocols, Xively become a ideal platform for our crawl method.
-We built a mini IoT search system to test our crawl scheduling method EasiCrawl, where we continuously monitored several datastream of 3 airqualityegg\cite{airegg} sensors located in London and Tokyo as an example for our case study. 
-Actually, accessing the sensors is accomplished by query the Xively database which hold the up-to-date sensor information. 
-This makes no different for us than directly accessing a real sensor. 
-One problem here is that most raw sensors on Xively don't support semantic senor description functions. 
-So we add a describing layer, which translate raw data streams to event sequence, by generating a log for the abnormal events in the raw data. 
-For example, a sudden raise in temperature or violation of radiation limit are taken as events, which will be stored as a item of description.
-We consider the high level of CO, NO\textsubscript{2}, are danger events, and the quick raise in temperature or quick changes in humidity may be caused by the miss use of electrical equipments, which should be also recorded. 
-We do not consider the temperature and humidity changes in the day time as interesting events, only to test the effectiveness of scheduling non-periodic sensors.
+With thousands of sensors that can be simply accessed through ip protocols, Xively become a ideal platform for testing our crawl method.
+We built a prototype IoT search engine with EasiCrawl, where we continuously monitored 12 datastreams of 3 airqualityegg\cite{airegg} sensors located in London and 3 sensors from Tokyo as our crawling target. 
+The only problem here is that most raw sensors on Xively don't support semantic senor description. 
+So we add a describing layer, which translate raw data streams to event sequences, by generating a log for interesting events from the raw data.
+EasiCrawl schedule the crawler based on the event frequency from logs and the sleep plan of different sensors.
+For example, a sudden raise in temperature or violation of radiation limit are taken as events, which will be stored as an item of description.
+The exceeding of density threshold for CO, NO\textsubscript{2} are logged as dangerous events.
+The quick raise in temperature or quick changes in humidity may be caused by the miss use of electrical equipments, which should also be recorded.
+In order to test the schedule performance with non-periodic sensors, we only log temperature and humidity events when people are at home, which is 6 p.m. to 9 a.m..
 
 \begin{figure}
 	\centering
@@ -634,6 +631,7 @@ In this case, the parameter for Poisson process of the arriving event sequence a
 Fig.\ref{fig:xivelycasestudy} is the raw sensor data of 4 different data streams, including CO, Humidity, NO\textsubscript{2}, along with the corresponding scheduling result. 
 The circle marks are the event captured and recorded which users may care. 
 The triangle marks are the actual crawls. 
+For each crawl, the latency is calculated by adding up every interval between events and next crawl, which is illustrated by the humidity part in Fig.\ref{fig:xivelycasestudy}.
 EasiCrawl can always hold a low latency level, which is 2 to 3 times lower than that of RandomCrawl.
 In this particular case, the average latency of the RandomCrawl is about 23 hours, while for EasiCrawl, the time is reduced to 13 hours. 
 

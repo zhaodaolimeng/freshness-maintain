@@ -2,71 +2,65 @@
 % standalone mode causes trouble when using tikz
 % http://www.texample.net/tikz/examples/system-combination/
 
-\documentclass[class=article,border=0pt]{standalone}
+\documentclass[class=article,border=2pt]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{shapes,arrows,shadows}
-\usepackage{amsmath,bm,times}
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
+
+\tikzset{
+  basic/.style  = {draw, text width=3cm, drop shadow, font=\sffamily, rectangle},
+  root/.style   = {basic, rounded corners=2pt, thin, align=center, fill=green!30},
+  crawler/.style = {basic, rounded corners=2pt, thin, align=center, fill=green!30},
+  level 2/.style = {basic, rounded corners=6pt, thin,align=center, fill=green!60, text width=8em},
+  level 3/.style = {basic, thin, align=left, fill=pink!60},
+  level 4/.style = {basic, thin, align=left, fill=pink!60, text width=6.5em}
+}
 
 \begin{document}
+\begin{tikzpicture}[
+  level 1/.style={sibling distance=40mm},
+  edge from parent/.style={->,draw},
+  >=latex]
 
-% Define the layers to draw the diagram
-\pgfdeclarelayer{background}
-\pgfdeclarelayer{foreground}
-\pgfsetlayers{background,main,foreground}
+% root of the the initial tree, level 1
+\node [root](r) {Repository\\ for IoT Search};
 
-% Define block styles used later
+% The first level, as children of the initial tree
+\node [crawler][below of = r](cw) {IoT Search}
+  child {node[level 2] (c1) {    Personal    }}
+  child {node[level 2] (c2) {    Local Area    }}
+  child {node[level 2] (c3) {    Public    }};
 
-\tikzstyle{event}=[draw, fill=gray!20, text width=4em, 
-    text centered, minimum height=2.5em,drop shadow]
-\tikzstyle{sensor}=[draw, fill=blue!20, text width=4em, 
-    text centered, minimum height=2.5em,drop shadow]
-\tikzstyle{ann} = [above, text width=5em, text centered]
-\tikzstyle{wa} = [sensor, text width=6em, fill=red!20, 
-    minimum height=4em, rounded corners, drop shadow]
-\tikzstyle{sc} = [sensor, text width=13em, fill=red!20, 
-    minimum height=10em, rounded corners, drop shadow]
+\draw [<-] (r)--(cw);
+\draw (c1) edge[out=45, in=180,->,dashed] node[xshift=-0.8cm]{Events} (cw.west) ;
+\draw (c2) edge[out=60, in=330,->,dashed] node[xshift=0.5cm]{Events} (cw.south);
+\draw (c3) edge[out=90, in=0,->,dashed] node[xshift=1cm]{Events} (cw.east);
 
-% Define distances for bordering
-\def \blockdist{1.5}
-\def \edgedist{1.5}
+% The second level, relatively positioned nodes
+\begin{scope}[every node/.style={level 3}]
+\node [below of = c1, xshift=15pt] (c11) {Health Care};
+\node [below of = c11] (c12) {Motion Detection};
 
-\begin{tikzpicture}
+\node [below of = c2, xshift=15pt] (c21) {Energy Monitor};
+\node [below of = c21] (c22) {Indoor Environment Monitor};
 
-    \node (wa)[wa]{IoT Crawlers};
-    \path (wa.west)+(-4.0,1.5) node (event1)[event]{$Events$};
-    \path (wa.west)+(-4.0,0.5) node (event2)[event] {$Events$};
-    \path (wa.west)+(-4.0,-1.0) node (event3)[ann] {$\vdots$}; 
-    \path (wa.west)+(-4.0,-2.0) node (event4)[event] {$Events$};
+\node [below of = c3, xshift=15pt] (c31) {Traffic Monitoring};
+\node [below of = c31] (c32) {Large Scale Environmental Sensing};
+\end{scope}
+
+% lines from each level 1 node to every one of its "children"
+\foreach \value in {1,2}
+  \draw[->] (c1.south west) |- (c1\value.west);
+\foreach \value in {1,2}
+  \draw[->] (c2.south west) |- (c2\value.west);
+\foreach \value in {1,2}
+  \draw[->] (c3.south west) |- (c3\value.west);
+
+% axis
+\draw[thick,<->] (-4.5,-5.5) node[anchor=east]{Privacy} -- (4.5,-5.5) node[anchor=west]{Cooperativity};
+\draw[thick,<->] (-6.25,-3.25) node[anchor=south, text width=2cm, align=center]{Initiative\\ Services} -- 
+				(-6.25,-4.25) node[anchor=north, text width=2cm, align=center]{Passive\\ Resources};
+% \draw[thick,->] (0,0) -- (0,4.5) node[anchor=south east] {y axis};
+
     
-    \path (event1.east)+(\blockdist,0) node (sensor1)[sensor]{$Sensor_1$};
-    \path (event2.east)+(\blockdist,0) node (sensor2)[sensor] {$Sensor_2$};
-    \path (event3.east)+(\blockdist-0.1,-0.4) node (sensor3)[ann] {$\vdots$}; 
-    \path (event4.east)+(\blockdist,0) node (sensor4)[sensor] {$Sensor_N$};
-    
-    \path (wa.east)+(\blockdist,0) node (repo) [wa] {Repository};
-    
-    \path (event1.east) -- node [above]{}(sensor1.west);
-    \draw [dashed, ->] (event1.east) -- (sensor1.west);
-    \path (event2.east) -- node [above]{}(sensor2.west);
-    \draw [dashed, ->] (event2.east) -- (sensor2.west);
-    \path (event4.east) -- node [above]{}(sensor4.west);
-    \draw [dashed, ->] (event4.east) -- (sensor4.west);
-    
-    \path [draw, <-] (sensor1.east) -- node [above]{}(wa.160) ;
-    \path [draw, <-] (sensor2.east) -- node [above]{}(wa.180);
-    \path [draw, <-] (sensor4.east) -- node [above]{}(wa.200);
-    \path [draw, ->] (wa.east) -- node [above]{}(repo.west);
-    \path (wa.south east) +(0, -0.6) node (asrs) {IoT Search Engine};
-    
-    \begin{pgfonlayer}{background}
-        \path (wa.west |- wa.north)+(-0.5,0.4) node (a) {};
-        \path (wa.south -| repo.east)+(+0.5,-0.3) node (b) {};
-        \path (repo.east |- repo.east)+(+0.5,-1.6) node (c) {};
-        \path[fill=yellow!20,rounded corners, draw=black!50, dashed]
-            (a) rectangle (c);           
-        \path (repo.north west)+(-0.2,0.2) node (a) {};
-    \end{pgfonlayer}
-
 \end{tikzpicture}
-
 \end{document}

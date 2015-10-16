@@ -1,0 +1,204 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 =====\
+Abstract\
+=====\
+\
+With rapid development of smart hardwares and networking protocols, more and more IoT sensors are becoming publicly accessible through the Internet, making the build of a generic IoT search engine possible.\
+\
+Crawling the content of these sensors is a fundamental step towards building such an IoT search engine.\
+\
+However, the sleep behavior and limited energy supply of sensors make the schedule of crawling more challenging. \
+Traditional web access strategy used in IoT situation may cause unpredictable latency in receiving events and low power efficiency. \
+So it is a significant problem to determine crawling schedule for building an efficient IoT search engine.\
+\
+In this paper, the problem of crawling periodically sleeping sensors are formulated as a schedule problem, which can be solved by constrained optimization. \
+\
+We first define a metric named expected latency to indicate whether users can find their interested events in time, and take it as the optimization object.\
+\
+We take expected latency as the optimization object, as this indicates whether user can find events they interested in time.\
+Then a sleep-aware hybrid schedule method, named EasiCrawl is proposed for achieving near-optimal expected latency of fetching interested events. \
+\
+Finally, performance of EasiCrawl is evaluated through simulations and a case study with real-world data from on open IoT platform named Xively.\
+\
+Simulations and dataset from Xively show that EasiCrawl outperform the periodic and greedy crawl strategy.\
+\
+\
+=====\
+Introduction\
+=====\
+\
+A large number of sensors have been deployed to collect environmental information. \
+When they are connected to the Internet, these sensors can be used to assist the human society to sense and control the physical world in an intelligent way.\
+\
+The extended Internet with sensors are known as the Internet of Things(IoT). \
+\
+With the booming of public accessible sensors in IoT, a generic search engine, which can help IoT users to find a particular type of sensors or to provide a fundamental platform for software developers to ease the development of IoT applications are urgently needed. \
+\
+Search of publicly accessible IoT sensors is the first step towards exploit the potential of IoT in sharing information, and consequently reflect the value of big data in physical world.\
+\
+For example, smart home applications have searchable sensors and devices to detect human activities and sense the indoor environment. \
+In smart city applications, publicly accessible sensors may be found in an ad hoc manner to provide predications relevant to traffic jam and queuing status.\
+In near future, intelligent systems like ambient assistant living is likely to be heavily dependent on information gathered from local sensors in room and publicly accessible IoT sensors to make smart decision, such as iBeacon for localization in public spaces.\
+\
+To use a growing number of IoT sensors easily, it calls for effective sensor search.\
+\
+=====\
+\
+Services provided by the IoT sensors are abstracted as resources. \
+Here resource is a single working unit that can act as both a data provider and a consumer in an IoT systems.\
+\
+That is to say, IoT sensors can either provide data source or use data sourcing from others.\
+Publicly accessible resources in the IoT systems can be classified into personal domain, local area domain and public domain according to their working scenarios. \
+\
+=====\
+\
+Fig. \\ref\{fig:architecture\} illustrates the concepts of these three kinds of resources. \
+In this architecture, it is assumed that resources can spontaneously provide description files that reveal events captured by local sensors.\
+IoT crawlers gathered the changes of description and maintain a repository used for answering queries.\
+It consists of events, sensors and an IoT search engine. \
+In the IoT search system, it is supposed that all sensors support IP protocol and are treated as web pages whose contents are automatically updating.\
+IoT crawlers crawl these descriptions, and copy them into a local repository at the server side.\
+The repository is an organized storage, from which the user queries about IoT sensors can be accomplished.\
+It is assumed that the users are only interested in some events captured by the corresponding sensors, which arrive with statistical regularity. Using the semantic IoT method, IoT sensors first capture these events and then continuously store them in sensors\'92 description files.\
+\
+IoT search engine regularly accesses these IoT descriptions and updates the related items in the repository accordingly.\
+\
+\
+=====\
+Existing works show that IoT search engine can be built using traditional web search techniques, like standardized protocols and semantic describing methods, such as CoRE[2] from IETF and SensorML[3]. \
+However, even with the state of art web search techniques, the design of IoT search engine is not a trivial task.\
+\
+In real world IoT systems, IoT sensor\'92s usually work in low \\textbf\{duty cycle\}, which means during their lifetime they switch between the working period and the sleeping period.\
+\
+IoT sensors usually use battery or replenishable power, which means the energy is very limited.\
+\
+These two instinctive characteristics of IoT sensors lead to the main challenge of efficient crawling IoT sensors. \
+\
+Briefly speaking, firstly and the main concern of this paper, IoT sensors have asynchronous and asymmetric sleeping periods in their duty cycles, which leads to hardness to update resource descriptions timely, whereas the freshness of descriptions crawled is a critical measurement of search operations.\
+\
+If a sensor is in sleeping period, it can neither capture events nor be accessed by IoT crawlers.\
+If events are not collected in time, the freshness of query results will be adversely impacted.\
+\
+We define a metric, named \\textbf\{expected latency\} of an event, as the metric of freshness, which is the duration from the time when sensor capture this event to the time when the event is crawled.\
+\
+The overall expected latency of all the events reflects the effectiveness of scheduling strategy of crawlers.\
+\
+Secondly, most of IoT sensors are low-powered devices, so \\textbf\{
+\b \ul energy consumption\}
+\b0 \ulnone  is a critical factor.\
+\
+An unnecessary high frequency of crawling a sensor may quickly exhaust the sensor\'92s energy.\
+\
+=====\
+\
+\
+To illustrate how the sensors\'92 sleeping behaviors impact the crawl efficiency of IoT search system, we use a clip of real world data in a smart home application.\
+\
+Fig. \\ref\{fig:smarthome\} is a sequence of data from a temperature sensor, which acts as a sensor for air-condition control. The quick variations or break of threshold are taken as \\textbf\{interesting events\}, which is logged into the description file immediately by the sensor.\
+\
+In addition, we suppose that when users are not at home, this sensor related control system will go into sleep mode for energy efficiency. We marked all these interesting events in the figure with circles. \
+\
+A traditional schedule strategy periodically crawls the sensor due to lack of awareness of sensors\'92 sleep behavior, as Fig. \\ref\{fig:smarthome\} illustrates by green cross.\
+\
+It will make invalid access to sleeping sensor, like those showed with pointers in Fig. \\ref\{smarthome\}.\
+So the traditional periodic schedule strategy does not perform well.\
+\
+Moreover, those missed changes in description files will lead to a delay during the sensor\'92s sleeping period. \
+For example, at time 210, the expected latency of events from previous woking period may accumulate to a significantly high level.\
+\
+In this paper, we propose a new server-side scheduling method, named EasiCrawl, which can proceed sleep-aware search by taking these two factors into consideration.\
+\
+=====\
+\
+The main contributions of this work are as follows: \
+\
+(1) Although crawler scheduling is well studied, to the best of our knowledge, this paper is the first to address the problem of crawling IoT consisting of sensors with duty cycles and energy constraints.\
+\
+(2) An iterative optimization approach, named EasiCrawl, is proposed for determine schedule of crawling sendors with different sleep pattern. \
+The approach includes a dynamic programming method as a subroutine to compute the optima crawl plan for each sensor. \
+A greedy method is also proposed as an complementary to fasten computing.\
+\
+(3) We evaluate EasiCrawl with simulations and a case study of real world data crawl from the IoT platform Xively\\ref\{xively\}.\
+\
+=====\
+\
+\
+The rest of the paper is organized as follows.\
+We introduce related work in section II, and formalized the optimization problem in section III, then introduce EasiCrawl in section IV.\
+Simulations are performed in section V and a case study is introduced in section VI.\
+\
+\
+=====\
+Related Work\
+=====\
+\
+There are a lot of off-the-shelf techniques that can be used for building IoT search systems.\
+\
+We have an overview on these techniques starting from network protocols used in LAN to automate discover connected devices, like UPnP\\cite\{upnp\} and Bonjour\\cite\{bonjour\}. \
+\
+Although these device discovery mechanisms are widely used, they are not suitable for IoT applications because of the following reasons. \
+\
+Firstly, these auto-configuration protocols are designed for devices with sustained power supply, while IoT sensors usually face strict energy limitations.\
+\
+Secondly, intensive searches of IoT sensors without any limits may quickly use out the sensors\'92 energy.\
+\
+Thirdly, these protocols use static description method, which is not capable of describing the real-time state of IoT sensors.\
+\
+As a result, these protocols can not be used in IoT search system.\
+\
+=====\
+\
+Besides the off-the-shelf technologies, a lot of new researches of IoT search look into new architectures instead of using the former methods of device discovery.\
+\
+Based on the way in which sensor\'92s information is gathered, these architectures can mainly be divided into two categories, namely push-based and pull-based search systems respectively.\
+\
+In push-based search systems, sensors collect and aggregate raw data for content search directly.\
+\
+IoT systems like TinyDB\\cite\{tinydb\} and IoT feeds\\cite\{iotfeeds\} process structured commands to directly response to query of sensor data streams.\
+\
+In this kind of IoT systems, the redundancy of raw sensor data may cause large overheads in energy consumption and data transition.\
+\
+Alternatively, most IoT search systems use the pull-based search architecture instead.\
+\
+A pull-based architecture usually uses structural description, i.e. XML, along with semantics, to describe IoT sensors. \
+\
+Previous works of semantic IoT\\cite\{semanticIoT\} and the propose of CoRE\\cite\{core\} are devoted to standardizing IoT sensor description languages and building a we-style IoT search system.\
+\
+Sensors update their description files based on data collected, making their behavior very similar to that of web pages.\
+\
+This characteristic makes the search of IoT with a traditional web search engine possible.\
+\
+For example, SPITFIRE\\cite\{spitfire\} uses crawlers and indexing methods to search for interesting events or sensors. \
+\
+The description files can be accessed by simple retrieving files in the ./well-known directory used in the CoRE framework.\
+\
+Although the communication over-head of pull-based architecture is relatively heavy, the scalability makes this architecture very promising.\
+\
+=====\
+\
+We also investigate the common crawl scheduling methods for pull-based search systems, which is a well studied topic in information retrieval.\
+\
+Previous works\\cite\{Cho2000\}\\cite\{Wolf2002\}\\cite\{Challenger2004\} analyzed how the crawler strategy affects freshness of the repository maintained by web crawlers.\
+\
+The level of freshness determines the query hit rate and whether this IoT search system can return an up-to-date result.\
+\
+However, those works were done based on the assumption that all the web pages can be accessed at any time, whereas in an IoT system, this assumption does not always hold.\
+\
+The retrieval of newly captured events may be delayed if the crawling is arranged just after a sleeping period.\
+\
+So the duty cycle of IoT sensors have significant impact on the latency of querying the crawl of description files of IoT sensors.\
+\
+In addition,  energy constraint IoT sensors may have access limits, which are not considered by perviously scheduling methods.\
+\
+In our work, the duty cycle and energy constraint are both taken into consideration.\
+\
+=====\
+\
+\
+\
+}
